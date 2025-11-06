@@ -16,7 +16,8 @@ def fetch_chip_industry_codes(stock_df: pd.DataFrame) -> List[Dict[str, str]]:
     """遍历证券列表，筛选行业含“芯片”的标的。"""
     results = []
     for _, row in stock_df.iterrows():
-        symbol = row["证券代码"]
+        # 证券代码 or A股代码
+        symbol = row["证券代码"] if "证券代码" in row else row["A股代码"]
         try:
             stock_industry_change_cninfo_df = ak.stock_industry_change_cninfo(
                 symbol=symbol,
