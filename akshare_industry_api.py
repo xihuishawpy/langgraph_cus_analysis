@@ -1,6 +1,3 @@
-"""
-Utility helpers for exporting all SW 三级行业 constituent stocks into a single Excel file.
-"""
 
 from __future__ import annotations
 
