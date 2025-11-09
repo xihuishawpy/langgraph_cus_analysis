@@ -29,6 +29,13 @@ class Configuration(BaseModel):
         },
     )
 
+    llm_backend: str = Field(
+        default="dashscope",
+        metadata={
+            "description": "LLM 后端：dashscope 或 local（禁用外部 LLM，走本地规则汇总）",
+        },
+    )
+
     number_of_initial_queries: int = Field(
         default=3,
         metadata={"description": "需要生成的初始搜索查询数量。"},
@@ -37,6 +44,41 @@ class Configuration(BaseModel):
     max_research_loops: int = Field(
         default=2,
         metadata={"description": "允许运行的研究循环最大次数。"},
+    )
+
+    knowledge_base_paths: str = Field(
+        default="eastmoney_concept_constituents.xlsx,sw_third_industry_constituents.xlsx",
+        metadata={
+            "description": "逗号分隔的 Excel 路径列表，用于构建内部知识库。",
+        },
+    )
+
+    knowledge_base_top_k: int = Field(
+        default=3,
+        metadata={
+            "description": "每次查询内部知识库时返回的最大行数。",
+        },
+    )
+
+    knowledge_base_embedding_model: str = Field(
+        default="text-embedding-v3",
+        metadata={
+            "description": "用于构建 FAISS 知识库索引的 Qwen/DashScope 向量模型名称。",
+        },
+    )
+
+    knowledge_base_embedding_backend: str = Field(
+        default="dashscope",
+        metadata={
+            "description": "知识库向量后端，可选 dashscope 或 local（SentenceTransformer）。",
+        },
+    )
+
+    knowledge_base_embedding_batch_size: int = Field(
+        default=10,
+        metadata={
+            "description": "向量编码批大小；DashScope 限制最大 10，超出将被自动截断。",
+        },
     )
 
     @classmethod

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 from langgraph.graph import add_messages
 from typing_extensions import Annotated
@@ -19,6 +19,7 @@ class OverallState(TypedDict):
     max_research_loops: int
     research_loop_count: int
     reasoning_model: str
+    query_texts: Annotated[list, operator.add]
 
 
 class ReflectionState(TypedDict):
