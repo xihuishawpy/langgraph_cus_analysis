@@ -1,15 +1,13 @@
-"""
-Export all Eastmoney concept-board constituents (股票-概念映射) via Akshare.
-"""
-
 from __future__ import annotations
 
 import argparse
 import time
+from io import StringIO
 from pathlib import Path
 from typing import Iterable, List, Sequence
 
 import pandas as pd
+import requests
 
 import akshare as ak
 
@@ -17,6 +15,16 @@ CONCEPT_NAME_CANDIDATES: Sequence[str] = ("概念名称", "板块名称", "名�
 CONCEPT_CODE_CANDIDATES: Sequence[str] = ("概念代码", "板块代码", "代码")
 STOCK_CODE_CANDIDATES: Sequence[str] = ("股票代码", "证券代码", "代码")
 STOCK_NAME_CANDIDATES: Sequence[str] = ("股票简称", "股票名称", "名称", "证券简称")
+
+THS_DETAIL_URL = "http://q.10jqka.com.cn/gn/detail/code/{code}/"
+THS_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Referer": "http://q.10jqka.com.cn/gn/",
+}
+THS_TIMEOUT = 15
 
 
 def _normalize_columns(columns: Iterable[object]) -> List[str]:
@@ -47,16 +55,33 @@ def _locate_column(
     raise ValueError(f"无法在列 {columns} 中找到“{label or fallback_contains or candidates}”")
 
 
-def _fetch_concept_metadata() -> tuple[pd.DataFrame, str, str]:
-    """Download Eastmoney concept table and detect key columns."""
-    df = ak.stock_board_concept_name_em()
-    if df.empty:
-        raise ValueError("未获取到任何概念板块数据。")
+def _fetch_concept_metadata(retries: int, pause: float) -> tuple[pd.DataFrame, str, str]:
+    """Download THS concept table and detect key columns."""
+    last_error: Exception | None = None
+    df: pd.DataFrame | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            df = ak.stock_board_concept_name_ths()
+            break
+        except Exception as exc:
+            last_error = exc
+            sleep_time = pause * attempt
+            print(
+                f"[WARN] 获取同花顺概念列表失败({attempt}/{retries}): {exc}. "
+                f"{sleep_time:.1f}s 后重试。"
+            )
+            time.sleep(sleep_time)
 
-    df.columns = _normalize_columns(df.columns)
-    name_col = _locate_column(df.columns, CONCEPT_NAME_CANDIDATES, fallback_contains="名称", label="概念名称")
-    code_col = _locate_column(df.columns, CONCEPT_CODE_CANDIDATES, fallback_contains="代码", label="概念代码")
-    return df, name_col, code_col
+    if df is None:
+        raise RuntimeError(f"同花顺概念列表多次获取失败: {last_error}") from last_error
+    if df.empty:
+        raise ValueError("未获取到任何同花顺概念板块数据。")
+
+    df = df.rename(columns={"name": "概念名称", "code": "概念代码"})
+    df["概念名称"] = df["概念名称"].astype(str).str.strip()
+    df["概念代码"] = df["概念代码"].astype(str).str.strip()
+    print(f"[INFO] 已获取同花顺概念 {len(df)} 个。")
+    return df, "概念名称", "概念代码"
 
 
 def _fetch_single_concept(
@@ -65,23 +90,50 @@ def _fetch_single_concept(
     retries: int,
     pause: float,
 ) -> pd.DataFrame | None:
-    """Try downloading one concept by trying multiple identifiers (name, code)."""
+    concept_name = identifiers[0] if identifiers else ""
+    concept_code = identifiers[1] if len(identifiers) > 1 else ""
+    if not concept_code:
+        print(f"[WARN] 同花顺概念 {concept_name} 缺少代码，已跳过。")
+        return None
+
+    url = THS_DETAIL_URL.format(code=concept_code)
     last_error: Exception | None = None
-    for symbol in identifiers:
-        if not symbol:
-            continue
-        for attempt in range(1, retries + 1):
-            try:
-                df = ak.stock_board_concept_cons_em(symbol=symbol)
-                df.columns = _normalize_columns(df.columns)
-                return df
-            except Exception as exc:
-                last_error = exc
-                sleep_time = pause * attempt
-                print(f"[WARN] 拉取概念 {symbol} 失败({attempt}/{retries}): {exc}. {sleep_time:.1f}s 后重试。")
-                time.sleep(sleep_time)
+    for attempt in range(1, retries + 1):
+        try:
+            resp = requests.get(url, headers=THS_HEADERS, timeout=THS_TIMEOUT)
+            resp.raise_for_status()
+            tables = pd.read_html(StringIO(resp.text))
+            if not tables:
+                raise ValueError("未解析到成份表")
+
+            selected: pd.DataFrame | None = None
+            for table in tables:
+                normalized_cols = _normalize_columns(table.columns)
+                has_code = any(col in normalized_cols for col in STOCK_CODE_CANDIDATES)
+                has_name = any(col in normalized_cols for col in STOCK_NAME_CANDIDATES)
+                if has_code and has_name:
+                    selected = table.copy()
+                    selected.columns = normalized_cols
+                    break
+
+            if selected is None:
+                raise ValueError("未找到包含代码/名称列的成份表")
+
+            if "代码" in selected.columns:
+                selected["代码"] = selected["代码"].astype(str).str.zfill(6)
+            return selected
+        except Exception as exc:
+            last_error = exc
+            sleep_time = pause * attempt
+            print(
+                f"[WARN] 拉取同花顺概念 {concept_name}({concept_code}) "
+                f"失败({attempt}/{retries}): {exc}. {sleep_time:.1f}s 后重试。"
+            )
+            time.sleep(sleep_time)
     if last_error:
-        print(f"[ERROR] 全部标识符 {identifiers} 均获取失败: {last_error}")
+        print(
+            f"[ERROR] 同花顺概念 {concept_name}({concept_code}) 获取失败: {last_error}"
+        )
     return None
 
 
@@ -122,12 +174,15 @@ def export_eastmoney_concepts(
     retries: int = 3,
     pause: float = 1.0,
 ) -> tuple[Path, list[str]]:
-    """Download all Eastmoney concept constituents and export to Excel."""
-    concept_df, name_col, code_col = _fetch_concept_metadata()
+    """Download THS concept constituents and export to Excel."""
+    concept_df, name_col, code_col = _fetch_concept_metadata(
+        retries=retries, pause=pause
+    )
     concept_df = concept_df.dropna(subset=[name_col]).drop_duplicates(subset=[name_col])
 
     frames: list[pd.DataFrame] = []
     failures: list[str] = []
+    print("[INFO] 当前数据源: 同花顺")
 
     iterable = concept_df[[name_col, code_col]].itertuples(index=False, name=None)
     for idx, row in enumerate(iterable, start=1):
