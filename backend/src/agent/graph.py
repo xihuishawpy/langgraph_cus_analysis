@@ -83,30 +83,35 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
     # 格式化提示词
     current_date = get_current_date()
     original_topic = get_research_topic(state["messages"])
-    # 行业报告模式触发时，给查询添加 TIC 视角偏置
-    topic_for_prompt = original_topic
+    candidate_text = _extract_latest_human_query(state.get("messages")) or original_topic
+    tic_mode = False
     try:
-        should_bias = False
-        if configurable.enable_industry_report_mode and configurable.industry_report_auto_detect:
-            candidate_text = _extract_latest_human_query(state.get("messages")) or original_topic
-            if _looks_like_sector_keyword(candidate_text):
-                # 若启用 KB，优先用 KB 命中判断是否足够支持行业报告
-                if configurable.enable_knowledge_base_search:
-                    kb = _get_excel_kb(configurable)
-                    min_hits = max(0, int(getattr(configurable, "industry_report_min_kb_hits", 2)))
-                    if min_hits == 0:
-                        should_bias = True
-                    else:
-                        records = kb.search(candidate_text, top_k=min_hits)
-                        if len(records) >= min_hits:
-                            should_bias = True
+        if (
+            configurable.enable_industry_report_mode
+            and configurable.industry_report_auto_detect
+            and _looks_like_sector_keyword(candidate_text)
+        ):
+            if configurable.enable_knowledge_base_search:
+                kb = _get_excel_kb(configurable)
+                min_hits = max(
+                    0, int(getattr(configurable, "industry_report_min_kb_hits", 2))
+                )
+                if min_hits == 0:
+                    tic_mode = True
                 else:
-                    # 未启用 KB 时也可进行轻量偏置
-                    should_bias = True
-        if should_bias:
-            topic_for_prompt = f"{original_topic}。请从检测认证（TIC）视角出发，优先覆盖：法规与标准、测试项目与方法、认证路径与资质、TAT 与价格、能力与产能、常见痛点。"
+                    records = kb.search(candidate_text, top_k=min_hits)
+                    tic_mode = len(records) >= min_hits
+            else:
+                tic_mode = True
     except Exception:
-        # 偏置失败不影响主流程
+        tic_mode = False
+
+    if tic_mode:
+        topic_for_prompt = (
+            f"{original_topic}。请从检测认证（TIC）视角出发，优先覆盖：法规与标准、测试项目与方法、"
+            "认证路径与资质、TAT 与价格、能力与产能、常见痛点，并覆盖 5-10 家核心公司的检测/认证需求差异。"
+        )
+    else:
         topic_for_prompt = original_topic
 
     formatted_prompt = query_writer_instructions.format(
@@ -116,7 +121,29 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
     )
     # 触发生成搜索查询
     result = structured_llm.invoke(formatted_prompt)
-    return {"search_query": result.query}
+    queries = [query.strip() for query in result.query if isinstance(query, str) and query.strip()]
+    if not queries:
+        queries = [original_topic]
+
+    if tic_mode:
+        base_kw = candidate_text or original_topic
+        company_queries = _build_company_list_queries(base_kw)
+        tic_queries = _build_tic_queries(base_kw)
+        prioritized = _deprioritize_tic_providers((company_queries + tic_queries + queries), topic=base_kw)
+        merged: List[str] = []
+        seen = set()
+        limit = int(state["initial_search_query_count"])
+        for query in prioritized:
+            if not query or query in seen:
+                continue
+            merged.append(query)
+            seen.add(query)
+            if len(merged) >= limit:
+                break
+        if merged:
+            queries = merged
+
+    return {"search_query": queries}
 
 
 def continue_to_web_research(state: QueryGenerationState):
@@ -250,6 +277,75 @@ def _looks_like_sector_keyword(text: str) -> bool:
     if any(ch in stripped for ch in disqualifiers):
         return False
     return True
+
+
+def _build_tic_queries(topic: str) -> List[str]:
+    """Generate TIC-focused search templates to guarantee detection/认证素材。"""
+    keyword = (topic or "").strip()
+    if not keyword:
+        return []
+    return [
+        f"{keyword} 检测 认证 标准 要求",
+        f"{keyword} 测试 项目 方法 可靠性 热循环 振动 冲击 湿热",
+        f"{keyword} 化学 有害物质 RoHS REACH 测试",
+        f"{keyword} EMC 安规 认证 CE UL CCC",
+        f"{keyword} IPC A-600 A-610 A-620 AEC-Q200 标准 要求",
+        f"{keyword} 实验室 资质 CNAS CMA IECQ 能力 TAT 价格",
+        f"{keyword} 认证 路径 流程 报告 证书 监督",
+    ]
+
+
+def _build_company_list_queries(topic: str) -> List[str]:
+    """Generate company list focused queries to enumerate manufacturers first."""
+    kw = (topic or "").strip()
+    if not kw:
+        return []
+    return [
+        f"{kw} 行业 公司 名单 龙头",
+        f"{kw} 上市 公司 名单",
+        f"{kw} 主要 企业 名录 产业链",
+        f"{kw} 供应商 名单 客户",
+        f"{kw} 产业链 公司 列表",
+    ]
+
+
+def _deprioritize_tic_providers(queries: List[str], topic: str) -> List[str]:
+    """Push pure TIC-provider queries to the end, keep manufacturer-first.
+
+    Heuristic: if a query is dominated by provider names (SGS/Intertek/TUV/UL/BV/华测/谱尼等)
+    and lacks manufacturer hints (公司/企业/厂/制造/生产), put it later unless the topic itself
+    targets that provider.
+    """
+    providers = (
+        "SGS",
+        "Intertek",
+        "TUV",
+        "TÜV",
+        "UL",
+        "DEKRA",
+        "BV",
+        "必维",
+        "谱尼",
+        "天祥",
+        "通标",
+        "华测",
+    )
+    topic_l = (topic or "").lower()
+    kept: List[str] = []
+    provider_q: List[str] = []
+    for q in queries:
+        qn = (q or "").strip()
+        if not qn:
+            continue
+        ql = qn.lower()
+        # if topic targets a provider explicitly, don't deprioritize
+        if topic_l and topic_l in ql:
+            kept.append(qn)
+            continue
+        is_provider = any(p.lower() in ql for p in providers)
+        has_manufacturer_hint = any(w in qn for w in ("公司", "企业", "厂", "制造", "生产"))
+        (provider_q if is_provider and not has_manufacturer_hint else kept).append(qn)
+    return kept + provider_q
 
 
 def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
