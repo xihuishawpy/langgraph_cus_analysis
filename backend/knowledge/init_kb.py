@@ -1,4 +1,4 @@
-"""CLI tool to pre-build the Excel knowledge base FAISS cache."""
+""" Excel knowledge base FAISS cache."""
 from __future__ import annotations
 
 import argparse
