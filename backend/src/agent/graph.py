@@ -1,4 +1,4 @@
-import os
+﻿import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -47,6 +47,7 @@ KB_CACHE: Dict[str, ExcelKnowledgeBase] = {}
 
 
 # LangGraph 节点定义
+
 def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerationState:
     """根据用户问题生成搜索查询的 LangGraph 节点。
 
@@ -158,7 +159,7 @@ def _get_excel_kb(configurable: Configuration) -> ExcelKnowledgeBase:
         f"{configurable.knowledge_base_embedding_backend.lower()}"
     )
     if key not in KB_CACHE:
-        paths = _resolve_kb_paths(key)
+        paths = _resolve_kb_paths(configurable.knowledge_base_paths)
         KB_CACHE[key] = ExcelKnowledgeBase(
             paths,
             embedding_model=configurable.knowledge_base_embedding_model,
@@ -207,6 +208,10 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
         状态更新字典，包含 sources_gathered、research_loop_count 与 web_research_result
     """
     configurable = Configuration.from_runnable_config(config)
+    is_dashscope_backend = (configurable.llm_backend or "dashscope").lower() == "dashscope"
+    use_tongyi_summary = (
+        is_dashscope_backend and configurable.enable_tongyi_search_summary
+    )
     query_text = state.get("query_text") or state["search_query"]
     formatted_prompt = web_searcher_instructions.format(
         current_date=get_current_date(),
@@ -241,8 +246,8 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
         "输出直接为综述正文。"
     )
 
-    # 无 LLM 后端：直接把搜索结果拼成要点摘要
-    if (configurable.llm_backend or "dashscope").lower() != "dashscope":
+    # 当禁用 LLM 或未开启通义千问搜索摘要时，直接整理要点
+    if not use_tongyi_summary:
         bullet_lines = []
         for s in sources:
             bullet_lines.append(f"- {s['title']} ({s['short_url']})")
@@ -275,9 +280,12 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
 def knowledge_base_research(state: OverallState, config: RunnableConfig) -> OverallState:
     """查询本地 Excel 知识库并生成带引用的摘要。"""
 
+    configurable = Configuration.from_runnable_config(config)
+    if not configurable.enable_knowledge_base_search:
+        return {}
+
     texts = state.get("query_texts") or []
     query_text = texts[-1] if texts else None
-    configurable = Configuration.from_runnable_config(config)
     kb = _get_excel_kb(configurable)
 
     if not query_text:
@@ -476,7 +484,7 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
     }
 
 
-# 构建智能体图
+################################################### 构建图#########################################
 builder = StateGraph(OverallState, config_schema=Configuration)
 
 # 定义核心节点

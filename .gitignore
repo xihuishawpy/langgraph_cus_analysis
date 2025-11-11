@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+~$*.xlsx
 uv.lock
 
 
@@ -47,6 +48,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.kb_cache/
 nosetests.xml
 coverage.xml
 *.cover

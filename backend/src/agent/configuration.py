@@ -36,6 +36,20 @@ class Configuration(BaseModel):
         },
     )
 
+    enable_knowledge_base_search: bool = Field(
+        default=True,
+        metadata={
+            "description": "是否启用本地知识库检索，默认关闭仅使用 Tavily 搜索",
+        },
+    )
+
+    enable_tongyi_search_summary: bool = Field(
+        default=False,
+        metadata={
+            "description": "是否在网络调研阶段调用通义千问生成摘要，默认关闭",
+        },
+    )
+
     number_of_initial_queries: int = Field(
         default=3,
         metadata={"description": "需要生成的初始搜索查询数量。"},

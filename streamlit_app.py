@@ -31,13 +31,25 @@ with st.sidebar:
     st.header("运行配置")
     initial_queries = st.number_input("初始搜索查询数量", min_value=1, max_value=5, value=3)
     max_loops = st.slider("最大研究循环", min_value=1, max_value=5, value=2)
-    kb_top_k = st.slider("知识库返回条数", min_value=1, max_value=10, value=3)
+    use_kb_search = st.checkbox("启用内部知识库检索", value=False)
+    kb_top_k = st.slider(
+        "知识库返回条数",
+        min_value=1,
+        max_value=10,
+        value=3,
+        disabled=not use_kb_search,
+    )
     query_model = st.text_input("查询生成模型", value="qwen-plus")
     reflection_model = st.text_input("反思模型", value="qwen-plus")
     answer_model = st.text_input("回答模型", value="qwen-plus")
     reasoning_model = st.text_input("推理模型 (可选)", value="")
-    embedding_model = st.text_input("知识库向量模型", value="text-embedding-v3")
+    embedding_model = st.text_input(
+        "知识库向量模型", value="text-embedding-v3", disabled=not use_kb_search
+    )
     llm_backend = st.selectbox("LLM 后端", options=["dashscope", "local"], index=0)
+    enable_tongyi_search_summary = st.checkbox(
+        "使用通义千问生成搜索摘要", value=False, help="默认关闭，可在需要更详细综述时开启"
+    )
 
 if "runs" not in st.session_state:
     st.session_state["runs"] = []
@@ -59,6 +71,8 @@ configurable_overrides: Dict[str, Any] = {
     ),
     "knowledge_base_embedding_model": embedding_model.strip() or "text-embedding-v3",
     "llm_backend": llm_backend,
+    "enable_knowledge_base_search": bool(use_kb_search),
+    "enable_tongyi_search_summary": bool(enable_tongyi_search_summary),
 }
 
 if run_button:

@@ -1,6 +1,8 @@
 """Vector-store backed Excel knowledge base using FAISS with pluggable embeddings."""
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from http import HTTPStatus
 from pathlib import Path
@@ -9,9 +11,12 @@ from typing import Iterable, List
 import numpy as np
 import pandas as pd
 
+CACHE_VERSION = "1"
+DEFAULT_CACHE_DIR = Path(__file__).resolve().parents[3] / ".kb_cache"
+
 try:
     import faiss
-except ImportError as exc:  # pragma: no cover
+except ImportError as exc:  
     raise ImportError(
         "FAISS 未安装，请运行 `pip install faiss-cpu` 或等效命令。"
     ) from exc
@@ -26,15 +31,15 @@ class KnowledgeRecord:
 
 
 class BaseEmbeddingClient:
-    def embed(self, texts: List[str]) -> np.ndarray:  # pragma: no cover - interface
+    def embed(self, texts: List[str]) -> np.ndarray:  
         raise NotImplementedError
 
 
 class QwenEmbeddingClient(BaseEmbeddingClient):
     def __init__(self, model: str, batch_size: int = 10):
         try:
-            from dashscope import TextEmbedding  # type: ignore
-        except ImportError as exc:  # pragma: no cover
+            from dashscope import TextEmbedding  
+        except ImportError as exc:  
             raise ImportError(
                 "dashscope SDK 未安装，请运行 `pip install dashscope`。"
             ) from exc
@@ -98,9 +103,17 @@ class ExcelKnowledgeBase:
         embedding_model: str,
         embedding_backend: str = "dashscope",
         embedding_batch_size: int = 10,
+        cache_dir: Path | None = None,
     ):
-        self._paths = list(paths)
+        self._paths = [Path(path) for path in paths]
         backend = embedding_backend.lower()
+        self._embedding_model = embedding_model
+        self._embedding_backend = backend
+        self._embedding_batch_size = embedding_batch_size
+        self._cache_dir = (cache_dir or DEFAULT_CACHE_DIR).expanduser().resolve()
+        self._cache_dir.mkdir(parents=True, exist_ok=True)
+        self._cache_key = self._compute_cache_key()
+
         if backend == "local":
             self._embedding_client: BaseEmbeddingClient = LocalEmbeddingClient(
                 embedding_model
@@ -111,9 +124,11 @@ class ExcelKnowledgeBase:
             )
         self._docs: List[dict] = []
         self._index: faiss.Index | None = None
-        self._load_documents()
-        if self._docs:
-            self._build_index()
+        if not self._load_from_cache():
+            self._load_documents()
+            if self._docs:
+                self._build_index()
+                self._persist_cache()
 
     def _load_documents(self) -> None:
         for path in self._paths:
@@ -154,6 +169,50 @@ class ExcelKnowledgeBase:
         index.add(embeddings)
         self._index = index
 
+    def _persist_cache(self) -> None:
+        if self._index is None or not self._docs:
+            return
+        index_path = self._cache_dir / f"{self._cache_key}.faiss"
+        docs_path = self._cache_dir / f"{self._cache_key}.json"
+        try:
+            faiss.write_index(self._index, str(index_path))
+            with docs_path.open("w", encoding="utf-8") as f:
+                json.dump(self._docs, f, ensure_ascii=False)
+        except Exception:
+            # 缓存写入失败时忽略，保持运行
+            pass
+
+    def _load_from_cache(self) -> bool:
+        index_path = self._cache_dir / f"{self._cache_key}.faiss"
+        docs_path = self._cache_dir / f"{self._cache_key}.json"
+        if not index_path.exists() or not docs_path.exists():
+            return False
+        try:
+            self._index = faiss.read_index(str(index_path))
+            with docs_path.open("r", encoding="utf-8") as f:
+                self._docs = json.load(f)
+            return True
+        except Exception:
+            self._index = None
+            self._docs = []
+            return False
+
+    def _compute_cache_key(self) -> str:
+        hasher = hashlib.sha256()
+        hasher.update(f"cache_version:{CACHE_VERSION}".encode("utf-8"))
+        hasher.update(f"backend:{self._embedding_backend}".encode("utf-8"))
+        hasher.update(f"model:{self._embedding_model}".encode("utf-8"))
+        for path in self._paths:
+            resolved = path.expanduser().resolve()
+            hasher.update(str(resolved).encode("utf-8"))
+            if resolved.exists():
+                stat = resolved.stat()
+                hasher.update(str(int(stat.st_mtime_ns)).encode("utf-8"))
+                hasher.update(str(stat.st_size).encode("utf-8"))
+            else:
+                hasher.update(b"missing")
+        return hasher.hexdigest()
+
     def search(self, query: str, top_k: int = 3) -> List[KnowledgeRecord]:
         if not query or self._index is None:
             return []
@@ -182,3 +241,11 @@ class ExcelKnowledgeBase:
     @property
     def is_empty(self) -> bool:
         return self._index is None or self._index.ntotal == 0
+
+    @property
+    def document_count(self) -> int:
+        return len(self._docs)
+
+    @property
+    def cache_dir(self) -> Path:
+        return self._cache_dir
