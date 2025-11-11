@@ -95,6 +95,27 @@ class Configuration(BaseModel):
         },
     )
 
+    enable_industry_report_mode: bool = Field(
+        default=True,
+        metadata={
+            "description": "是否开启行业报告模式，根据主题自动切换结构化模板。",
+        },
+    )
+
+    industry_report_auto_detect: bool = Field(
+        default=True,
+        metadata={
+            "description": "是否在检测到短行业/概念关键词且命中知识库时自动切换行业报告模板。",
+        },
+    )
+
+    industry_report_min_kb_hits: int = Field(
+        default=2,
+        metadata={
+            "description": "自动切换行业报告模板所需的最少知识库引用命中数。",
+        },
+    )
+
     @classmethod
     def from_runnable_config(
         cls, config: Optional[RunnableConfig] = None

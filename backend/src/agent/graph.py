@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import dotenv
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
@@ -13,6 +13,7 @@ from agent.configuration import Configuration
 from agent.prompts import (
     answer_instructions,
     get_current_date,
+    industry_report_instructions,
     kb_searcher_instructions,
     query_writer_instructions,
     reflection_instructions,
@@ -81,9 +82,36 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
 
     # 格式化提示词
     current_date = get_current_date()
+    original_topic = get_research_topic(state["messages"])
+    # 行业报告模式触发时，给查询添加 TIC 视角偏置
+    topic_for_prompt = original_topic
+    try:
+        should_bias = False
+        if configurable.enable_industry_report_mode and configurable.industry_report_auto_detect:
+            candidate_text = _extract_latest_human_query(state.get("messages")) or original_topic
+            if _looks_like_sector_keyword(candidate_text):
+                # 若启用 KB，优先用 KB 命中判断是否足够支持行业报告
+                if configurable.enable_knowledge_base_search:
+                    kb = _get_excel_kb(configurable)
+                    min_hits = max(0, int(getattr(configurable, "industry_report_min_kb_hits", 2)))
+                    if min_hits == 0:
+                        should_bias = True
+                    else:
+                        records = kb.search(candidate_text, top_k=min_hits)
+                        if len(records) >= min_hits:
+                            should_bias = True
+                else:
+                    # 未启用 KB 时也可进行轻量偏置
+                    should_bias = True
+        if should_bias:
+            topic_for_prompt = f"{original_topic}。请从检测认证（TIC）视角出发，优先覆盖：法规与标准、测试项目与方法、认证路径与资质、TAT 与价格、能力与产能、常见痛点。"
+    except Exception:
+        # 偏置失败不影响主流程
+        topic_for_prompt = original_topic
+
     formatted_prompt = query_writer_instructions.format(
         current_date=current_date,
-        research_topic=get_research_topic(state["messages"]),
+        research_topic=topic_for_prompt,
         number_queries=state["initial_search_query_count"],
     )
     # 触发生成搜索查询
@@ -193,6 +221,35 @@ def _format_kb_sources(records) -> tuple[str, List[dict]]:
             }
         )
     return "\n\n".join(formatted_blocks), sources
+
+
+def _extract_latest_human_query(messages) -> str:
+    """Return the most recent human utterance, fallback to empty string."""
+    if not messages:
+        return ""
+    for message in reversed(messages):
+        if isinstance(message, HumanMessage):
+            content = getattr(message, "content", "")
+            if isinstance(content, str):
+                return content.strip()
+            return str(content).strip()
+    return ""
+
+
+def _looks_like_sector_keyword(text: str) -> bool:
+    """Heuristic to check if the query resembles a concise industry/sector keyword."""
+    if not text:
+        return False
+    stripped = text.strip()
+    if not stripped:
+        return False
+    # 过长或包含明显句子/标点则视为综合问题
+    if len(stripped) > 24:
+        return False
+    disqualifiers = ("？", "?", "！", "!", "。", ".", ";", "；", ",", "，", "\n")
+    if any(ch in stripped for ch in disqualifiers):
+        return False
+    return True
 
 
 def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
@@ -446,12 +503,31 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
     configurable = Configuration.from_runnable_config(config)
     reasoning_model = state.get("reasoning_model") or configurable.answer_model
 
-    # 格式化提示词
+    # 计算基础上下文
     current_date = get_current_date()
-    formatted_prompt = answer_instructions.format(
+    research_topic = get_research_topic(state["messages"])
+    summaries = "\n---\n\n".join(state["web_research_result"])
+    latest_human_query = _extract_latest_human_query(state.get("messages"))
+    kb_hits = sum(
+        1
+        for source in state.get("sources_gathered", [])
+        if str(source.get("short_url", "")).startswith("kb://")
+    )
+    min_kb_hits = max(0, int(configurable.industry_report_min_kb_hits))
+
+    # 判断是否切换行业报告模板
+    use_industry_report = False
+    if configurable.enable_industry_report_mode:
+        if configurable.industry_report_auto_detect:
+            candidate_text = latest_human_query or research_topic
+            if _looks_like_sector_keyword(candidate_text) and kb_hits >= min_kb_hits:
+                use_industry_report = True
+
+    template = industry_report_instructions if use_industry_report else answer_instructions
+    formatted_prompt = template.format(
         current_date=current_date,
-        research_topic=get_research_topic(state["messages"]),
-        summaries="\n---\n\n".join(state["web_research_result"]),
+        research_topic=research_topic,
+        summaries=summaries,
     )
 
     # 无 LLM 后端：直接将阶段性摘要合并为最终回答
@@ -471,7 +547,7 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
 
     # 将短链接替换为原始链接，并记录最终引用的来源
     unique_sources = []
-    for source in state["sources_gathered"]:
+    for source in state.get("sources_gathered", []):
         if source["short_url"] in result.content:
             result.content = result.content.replace(
                 source["short_url"], source["value"]
