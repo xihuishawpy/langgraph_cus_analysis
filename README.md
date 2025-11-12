@@ -45,7 +45,7 @@
    ```
    Streamlit 与 LangGraph 均默认读取仓库根目录的 `.env`。
 
-## 构建 Excel 知识库缓存（可选但推荐）
+## 构建 Excel 知识库缓存（可选）
 
 `ExcelKnowledgeBase` 会在首次检索时自动读取 Excel 并写入 `.kb_cache/`，也可以手动预构建：
 
