@@ -28,6 +28,7 @@ THS_TIMEOUT = 15
 
 
 def _normalize_columns(columns: Iterable[object]) -> List[str]:
+    """标准化列名为去空格的字符串列表。"""
     return [str(col).strip() for col in columns]
 
 
@@ -39,6 +40,7 @@ def _locate_column(
     exclude_contains: Sequence[str] = (),
     label: str = "",
 ) -> str:
+    """根据候选名或包含规则定位目标列名。"""
     for candidate in candidates:
         if candidate in columns:
             return candidate
@@ -56,7 +58,7 @@ def _locate_column(
 
 
 def _fetch_concept_metadata(retries: int, pause: float) -> tuple[pd.DataFrame, str, str]:
-    """Download THS concept table and detect key columns."""
+    """抓取同花顺概念列表并识别名称/代码列。"""
     last_error: Exception | None = None
     df: pd.DataFrame | None = None
     for attempt in range(1, retries + 1):
@@ -90,6 +92,7 @@ def _fetch_single_concept(
     retries: int,
     pause: float,
 ) -> pd.DataFrame | None:
+    """请求并解析单个概念的成份股表。"""
     concept_name = identifiers[0] if identifiers else ""
     concept_code = identifiers[1] if len(identifiers) > 1 else ""
     if not concept_code:
@@ -138,7 +141,7 @@ def _fetch_single_concept(
 
 
 def _standardize_constituents(df: pd.DataFrame) -> pd.DataFrame:
-    """Ensure constituent dataframe has 股票代码/股票简称列。"""
+    """规范成份股表列名为"股票代码/股票简称"。"""
     if df.empty:
         return df
 
@@ -174,7 +177,7 @@ def export_eastmoney_concepts(
     retries: int = 3,
     pause: float = 1.0,
 ) -> tuple[Path, list[str]]:
-    """Download THS concept constituents and export to Excel."""
+    """抓取全部概念成份股并导出为Excel。"""
     concept_df, name_col, code_col = _fetch_concept_metadata(
         retries=retries, pause=pause
     )

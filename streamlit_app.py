@@ -16,8 +16,8 @@ if str(BACKEND_SRC) not in sys.path:
 
 from agent.graph import graph  # noqa: E402
 
-st.set_page_config(page_title="Pro Search Agent 调试台", layout="wide")
-st.title("🔍 Pro Search Agent 调试台")
+st.set_page_config(page_title="Pro Search Agent", layout="wide")
+st.title("🔍 Pro Search Agent")
 
 REQUIRED_KEYS = ["DASHSCOPE_API_KEY", "TAVILY_API_KEY"]
 missing_keys = [name for name in REQUIRED_KEYS if not os.getenv(name)]
@@ -30,13 +30,13 @@ if missing_keys:
 with st.sidebar:
     st.header("运行配置")
     initial_queries = st.number_input("初始搜索查询数量", min_value=1, max_value=5, value=3)
-    max_loops = st.slider("最大研究循环", min_value=1, max_value=5, value=2)
-    use_kb_search = st.checkbox("启用内部知识库检索", value=False)
+    max_loops = st.slider("最大研究循环", min_value=1, max_value=5, value=1)
+    use_kb_search = st.checkbox("启用内部知识库检索", value=True)
     kb_top_k = st.slider(
         "知识库返回条数",
         min_value=1,
-        max_value=10,
-        value=3,
+        max_value=30,
+        value=10,
         disabled=not use_kb_search,
     )
     query_model = st.text_input("查询生成模型", value="qwen-plus")

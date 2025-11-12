@@ -1,4 +1,5 @@
 ﻿import os
+import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -67,9 +68,46 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
     if state.get("initial_search_query_count") is None:
         state["initial_search_query_count"] = configurable.number_of_initial_queries
 
+    current_date = get_current_date()
+    original_topic = get_research_topic(state["messages"])
+    candidate_text = _extract_latest_human_query(state.get("messages")) or original_topic
+
+    broad_topic_mode = False
+    try:
+        if (
+            configurable.enable_industry_report_mode
+            and configurable.industry_report_auto_detect
+            and _is_broad_topic(candidate_text)
+        ):
+            broad_topic_mode = True
+    except Exception:
+        broad_topic_mode = False
+
     # 若禁用外部 LLM，则直接用用户问题作为单条查询
     if (configurable.llm_backend or "dashscope").lower() != "dashscope":
-        return {"search_query": [get_research_topic(state["messages"]) ]}
+        limit = int(state["initial_search_query_count"])
+        if broad_topic_mode:
+            base_kw = candidate_text or original_topic
+            assembled = _deprioritize_tic_providers(
+                _build_overview_queries(base_kw)
+                + _build_lead_finder_queries(base_kw)
+                + _build_demand_signal_queries(base_kw)
+                + _build_tic_queries(base_kw)
+                + [original_topic],
+                topic=base_kw,
+            )
+            dedup: List[str] = []
+            seen = set()
+            for query in assembled:
+                query = (query or "").strip()
+                if not query or query in seen:
+                    continue
+                dedup.append(query)
+                seen.add(query)
+                if len(dedup) >= limit:
+                    break
+            return {"search_query": dedup or [original_topic]}
+        return {"search_query": [original_topic]}
 
     # 初始化通义千问模型
     llm = ChatTongyi(
@@ -80,36 +118,12 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
     )
     structured_llm = llm.with_structured_output(SearchQueryList)
 
-    # 格式化提示词
-    current_date = get_current_date()
-    original_topic = get_research_topic(state["messages"])
-    candidate_text = _extract_latest_human_query(state.get("messages")) or original_topic
-    tic_mode = False
-    try:
-        if (
-            configurable.enable_industry_report_mode
-            and configurable.industry_report_auto_detect
-            and _looks_like_sector_keyword(candidate_text)
-        ):
-            if configurable.enable_knowledge_base_search:
-                kb = _get_excel_kb(configurable)
-                min_hits = max(
-                    0, int(getattr(configurable, "industry_report_min_kb_hits", 2))
-                )
-                if min_hits == 0:
-                    tic_mode = True
-                else:
-                    records = kb.search(candidate_text, top_k=min_hits)
-                    tic_mode = len(records) >= min_hits
-            else:
-                tic_mode = True
-    except Exception:
-        tic_mode = False
-
-    if tic_mode:
+    if broad_topic_mode:
         topic_for_prompt = (
-            f"{original_topic}。请从检测认证（TIC）视角出发，优先覆盖：法规与标准、测试项目与方法、"
-            "认证路径与资质、TAT 与价格、能力与产能、常见痛点，并覆盖 5-10 家核心公司的检测/认证需求差异。"
+            f"{original_topic}。请面向检测认证（TIC）从业者，优先梳理行业底层逻辑、价值链/应用、"
+            "原材料/关键设备/技术路线、需求/痛点，输出 5-10 个潜在客户（含产品/应用/检测项/认证路径）。"
+            "同时总结该话题下常见的标准/法规/认证路径、测试项目组合、样品/TAT/费用量级与合作模式，"
+            "并将这些信息转化为下一步可执行的搜索/走访方向。"
         )
     else:
         topic_for_prompt = original_topic
@@ -125,19 +139,27 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
     if not queries:
         queries = [original_topic]
 
-    if tic_mode:
+    if broad_topic_mode:
         base_kw = candidate_text or original_topic
-        company_queries = _build_company_list_queries(base_kw)
+        overview = _build_overview_queries(base_kw)
+        leads = _build_lead_finder_queries(base_kw)
+        demand = _build_demand_signal_queries(base_kw)
         tic_queries = _build_tic_queries(base_kw)
-        prioritized = _deprioritize_tic_providers((company_queries + tic_queries + queries), topic=base_kw)
+        prioritized = _deprioritize_tic_providers(
+            overview + leads + demand + tic_queries + queries,
+            topic=base_kw,
+        )
         merged: List[str] = []
         seen = set()
         limit = int(state["initial_search_query_count"])
         for query in prioritized:
-            if not query or query in seen:
+            if not query:
                 continue
-            merged.append(query)
-            seen.add(query)
+            normalized = query.strip()
+            if not normalized or normalized in seen:
+                continue
+            merged.append(normalized)
+            seen.add(normalized)
             if len(merged) >= limit:
                 break
         if merged:
@@ -161,7 +183,7 @@ def continue_to_web_research(state: QueryGenerationState):
 
 
 def _format_tavily_sources(results: List[dict], run_id: str) -> tuple[str, List[dict]]:
-    """将 Tavily 检索结果格式化为提示文本与引用信息。"""
+    """将 Tavily 搜索结果整理成文本块和引用信息，方便生成摘要与引用。"""
     urls = [item["url"] for item in results]
     resolved_urls = resolve_urls(urls, run_id)
 
@@ -193,8 +215,8 @@ def _format_tavily_sources(results: List[dict], run_id: str) -> tuple[str, List[
         )
     return "\n\n".join(formatted_blocks), sources
 
-
 def _resolve_kb_paths(path_string: str) -> List[Path]:
+    """解析配置中的路径字符串，返回标准化后的 Excel 文件路径列表。"""
     paths: List[Path] = []
     for raw in path_string.split(","):
         candidate = raw.strip()
@@ -208,6 +230,7 @@ def _resolve_kb_paths(path_string: str) -> List[Path]:
 
 
 def _get_excel_kb(configurable: Configuration) -> ExcelKnowledgeBase:
+    """根据配置构建或复用 Excel 知识库索引，避免重复加载嵌入。"""
     key = (
         f"{configurable.knowledge_base_paths}|"
         f"{configurable.knowledge_base_embedding_model}|"
@@ -227,13 +250,14 @@ def _get_excel_kb(configurable: Configuration) -> ExcelKnowledgeBase:
 
 
 def _format_kb_sources(records) -> tuple[str, List[dict]]:
+    """将知识库命中的记录格式化成文本段落和引用信息。"""
     formatted_blocks: List[str] = []
     sources: List[dict] = []
     for idx, record in enumerate(records, start=1):
         source_id = f"K{idx}"
-        location = f"{record.source} 行 {record.row_index}"
+        location = f"{record.source} 第 {record.row_index} 行"
         block_lines = [
-            f"[{source_id}] 数据源: {record.source}",
+            f"[{source_id}] 来源: {record.source}",
             f"行号: {record.row_index}",
             f"内容: {record.text}",
         ]
@@ -251,7 +275,7 @@ def _format_kb_sources(records) -> tuple[str, List[dict]]:
 
 
 def _extract_latest_human_query(messages) -> str:
-    """Return the most recent human utterance, fallback to empty string."""
+    """返回最近一条用户消息文本，若无则返回空字符串。"""
     if not messages:
         return ""
     for message in reversed(messages):
@@ -264,58 +288,174 @@ def _extract_latest_human_query(messages) -> str:
 
 
 def _looks_like_sector_keyword(text: str) -> bool:
-    """Heuristic to check if the query resembles a concise industry/sector keyword."""
+    """判断字符串是否像一个精简的行业/赛道关键词，用于触发行业模式。"""
     if not text:
         return False
     stripped = text.strip()
     if not stripped:
         return False
-    # 过长或包含明显句子/标点则视为综合问题
     if len(stripped) > 24:
         return False
-    disqualifiers = ("？", "?", "！", "!", "。", ".", ";", "；", ",", "，", "\n")
+    disqualifiers = ("？", "?", "！", "!", "。", ".", "；", ";", "，", ",", "\n")
     if any(ch in stripped for ch in disqualifiers):
         return False
     return True
 
 
+def _looks_like_company_query(text: str) -> bool:
+    """检测输入是否指向具体公司或证券，避免误判为行业主题。"""
+    if not text:
+        return False
+    t = text.strip()
+    if not t:
+        return False
+    company_markers = (
+        "公司",
+        "企业",
+        "集团",
+        "股份",
+        "科技",
+        "控股",
+        "有限公司",
+        "股份有限公司",
+        "上市公司",
+        "Co.",
+        "Inc",
+        "Corp",
+        "Corporation",
+        "PLC",
+        "Ltd",
+        "LLC",
+        "AG",
+        "SA",
+    )
+    if any(marker in t for marker in company_markers):
+        return True
+    if re.search(r"\b(SZ|SH|HK|NASDAQ|NYSE)\b", t, flags=re.IGNORECASE):
+        return True
+    if re.search(r"\b(60|00|30)\d{4}\b", t):
+        return True
+    return False
+
+
+def _is_broad_topic(text: str) -> bool:
+    """识别是否属于行业/技术层面的宽泛主题，从而触发行业报告流程。"""
+    if not text:
+        return False
+    t = text.strip()
+    if not t or _looks_like_company_query(t):
+        return False
+    if _looks_like_sector_keyword(t):
+        return True
+    broad_markers = (
+        "行业",
+        "产业",
+        "赛道",
+        "市场",
+        "生态",
+        "供应链",
+        "价值链",
+        "应用",
+        "场景",
+        "技术",
+        "材料",
+        "产品",
+        "设备",
+        "趋势",
+        "格局",
+        "标准",
+        "规范",
+        "认证",
+        "合规",
+        "监管",
+    )
+    if any(marker in t for marker in broad_markers):
+        return True
+    if len(t) <= 36 and not any(ch in t for ch in ("？", "?", "！", "!", "；", ";", "，", ",", "\n")):
+        return True
+    return False
+
+
+def _build_overview_queries(topic: str) -> List[str]:
+    """构造行业概览类查询，聚焦市场、价值链与应用等基础信息。"""
+    kw = (topic or "").strip()
+    if not kw:
+        return []
+    return [
+        f"{kw} 行业概述 价值链 核心应用",
+        f"{kw} 市场规模 增速 预测",
+        f"{kw} 上游 下游 关键材料 关键设备 核心技术",
+        f"{kw} 主要参与者 厂商名单 竞争格局",
+        f"{kw} 供应链 价值链 风险 痛点",
+        f"{kw} 标准 规范 国标 行标 国际标准",
+        f"{kw} 监管 合规 要求 政策",
+        f"{kw} 应用场景 细分赛道",
+    ]
+
+
+def _build_lead_finder_queries(topic: str) -> List[str]:
+    """构造潜在客户/渠道线索类查询，用于挖掘厂商、客户与合作方名单。"""
+    kw = (topic or "").strip()
+    if not kw:
+        return []
+    return [
+        f"{kw} 行业公司 厂商 名单 领军",
+        f"{kw} 参展商 名单 展会 2023 2024 2025",
+        f"{kw} 供应链 客户 典型案例",
+        f"{kw} 海外市场 品牌 厂商 名单",
+        f"{kw} 产能 扩张 新工厂 建设 调试",
+        f"{kw} 招聘 质量 认证 合规 工程师",
+        f"{kw} 渠道 分销 商业 协会",
+    ]
+
+
+def _build_demand_signal_queries(topic: str) -> List[str]:
+    """构造需求信号类查询，锁定招投标、法规变动与风险事件。"""
+    kw = (topic or "").strip()
+    if not kw:
+        return []
+    return [
+        f"{kw} 招标 采购 RFQ RFP",
+        f"{kw} 出口 合规 认证 要求 市场准入",
+        f"{kw} 召回 不合规 通知 监管 抽检",
+        f"{kw} 新法规 新标准 更新 生效 时间表",
+        f"{kw} 测试项目 产品规格 标准 映射",
+        f"{kw} 样品 检验 批量 AQL 物流 要求",
+    ]
+
+
 def _build_tic_queries(topic: str) -> List[str]:
-    """Generate TIC-focused search templates to guarantee detection/认证素材。"""
+    """生成聚焦检测/认证的查询模板，确保覆盖 TIC 关键诉求。"""
     keyword = (topic or "").strip()
     if not keyword:
         return []
     return [
         f"{keyword} 检测 认证 标准 要求",
-        f"{keyword} 测试 项目 方法 可靠性 热循环 振动 冲击 湿热",
-        f"{keyword} 化学 有害物质 RoHS REACH 测试",
-        f"{keyword} EMC 安规 认证 CE UL CCC",
-        f"{keyword} IPC A-600 A-610 A-620 AEC-Q200 标准 要求",
-        f"{keyword} 实验室 资质 CNAS CMA IECQ 能力 TAT 价格",
-        f"{keyword} 认证 路径 流程 报告 证书 监督",
+        f"{keyword} 测试 项目 可靠性 环境 应力",
+        f"{keyword} 法规 RoHS REACH 合规",
+        f"{keyword} EMC 测试 CE UL CCC",
+        f"{keyword} IPC A-600 A-610 A-620 AEC-Q200 标准",
+        f"{keyword} 实验室 CNAS CMA IECQ TAT 价格",
+        f"{keyword} 认证 路径 证书 监管",
     ]
 
 
 def _build_company_list_queries(topic: str) -> List[str]:
-    """Generate company list focused queries to enumerate manufacturers first."""
+    """生成以厂商清单为主的查询，用于补齐客户名单。"""
     kw = (topic or "").strip()
     if not kw:
         return []
     return [
-        f"{kw} 行业 公司 名单 龙头",
-        f"{kw} 上市 公司 名单",
-        f"{kw} 主要 企业 名录 产业链",
-        f"{kw} 供应商 名单 客户",
-        f"{kw} 产业链 公司 列表",
+        f"{kw} 产业 公司 厂商 龙头",
+        f"{kw} 相关 企业 名单",
+        f"{kw} 主要 企业 名录 上市",
+        f"{kw} 供应链 客户 合作",
+        f"{kw} 行业内 公司 列表",
     ]
 
 
 def _deprioritize_tic_providers(queries: List[str], topic: str) -> List[str]:
-    """Push pure TIC-provider queries to the end, keep manufacturer-first.
-
-    Heuristic: if a query is dominated by provider names (SGS/Intertek/TUV/UL/BV/华测/谱尼等)
-    and lacks manufacturer hints (公司/企业/厂/制造/生产), put it later unless the topic itself
-    targets that provider.
-    """
+    """将纯检测机构相关的查询放到队列末尾，优先输出厂商/市场信息。"""
     providers = (
         "SGS",
         "Intertek",
@@ -324,11 +464,11 @@ def _deprioritize_tic_providers(queries: List[str], topic: str) -> List[str]:
         "UL",
         "DEKRA",
         "BV",
-        "必维",
-        "谱尼",
-        "天祥",
         "通标",
+        "必维",
         "华测",
+        "通用",
+        "国检",
     )
     topic_l = (topic or "").lower()
     kept: List[str] = []
@@ -338,15 +478,13 @@ def _deprioritize_tic_providers(queries: List[str], topic: str) -> List[str]:
         if not qn:
             continue
         ql = qn.lower()
-        # if topic targets a provider explicitly, don't deprioritize
         if topic_l and topic_l in ql:
             kept.append(qn)
             continue
         is_provider = any(p.lower() in ql for p in providers)
-        has_manufacturer_hint = any(w in qn for w in ("公司", "企业", "厂", "制造", "生产"))
+        has_manufacturer_hint = any(w in qn for w in ("公司", "企业", "厂", "供应", "客户"))
         (provider_q if is_provider and not has_manufacturer_hint else kept).append(qn)
     return kept + provider_q
-
 
 def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
     """使用 Tavily API 执行网络调研的 LangGraph 节点。
@@ -611,13 +749,16 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
     )
     min_kb_hits = max(0, int(configurable.industry_report_min_kb_hits))
 
-    # 判断是否切换行业报告模板
     use_industry_report = False
     if configurable.enable_industry_report_mode:
+        candidate_text = latest_human_query or research_topic
         if configurable.industry_report_auto_detect:
-            candidate_text = latest_human_query or research_topic
-            if _looks_like_sector_keyword(candidate_text) and kb_hits >= min_kb_hits:
+            if _is_broad_topic(candidate_text):
                 use_industry_report = True
+            elif kb_hits >= min_kb_hits and _looks_like_sector_keyword(candidate_text):
+                use_industry_report = True
+        else:
+            use_industry_report = True
 
     template = industry_report_instructions if use_industry_report else answer_instructions
     formatted_prompt = template.format(
