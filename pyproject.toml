@@ -1,0 +1,151 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crewai-app"
+version = "1.0.0"
+description = "CrewAI-based multi-agent analysis system for enterprise research"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "CrewAI App Team", email = "team@crewai-app.com"}
+]
+maintainers = [
+    {name = "CrewAI App Team", email = "team@crewai-app.com"}
+]
+keywords = ["crewai", "multi-agent", "ai", "research", "analysis"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "crewai>=1.6.0",
+    "claude-agent-sdk>=0.1.9",
+    "dashscope>=1.25.2",
+    "faiss-cpu>=1.13.0",
+    "langchain-community>=0.4.1",
+    "langchain-core>=1.1.0",
+    "numpy>=2.3.5",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.4",
+    "python-dotenv>=1.2.1",
+    "pyyaml>=6.0.3",
+    "sentence-transformers>=5.1.2",
+    "tavily-python>=0.7.13",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+    "pre-commit>=3.6.0",
+    "isort>=5.13.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings-python>=1.8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/xihuishawpy/langgraph_cus_analysis"
+Documentation = "https://github.com/xihuishawpy/langgraph_cus_analysis/tree/feature/crewai_app"
+Repository = "https://github.com/xihuishawpy/langgraph_cus_analysis.git"
+"Bug Tracker" = "https://github.com/xihuishawpy/langgraph_cus_analysis/issues"
+
+[project.scripts]
+crewai-app = "crewai_app.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["crewai_app*"]
+exclude = ["tests*", "examples*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["crewai_app"]
+omit = ["*/tests/*", "*/test_*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.uv]
+index-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+trusted-host = ["pypi.tuna.tsinghua.edu.cn"]
+
+[tool.uv.sources]
