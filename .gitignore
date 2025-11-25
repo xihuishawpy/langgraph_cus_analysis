@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 ~$*.xlsx
 uv.lock
-
+.claude
 
 frontend/
 
