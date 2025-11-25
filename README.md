@@ -107,6 +107,28 @@ streamlit run streamlit_app.py
 2. 点“开始调研”，查看执行状态与引用。
 3. 侧边栏可调整初始查询条数、循环次数、是否启用知识库等参数。
 
+### 3. CrewAI 版本（实验性）
+
+`crewai_app/` 提供了一个与 backend 同步逻辑的多 Agent 工作流，依赖 [CrewAI Quickstart](https://docs.crewai.org.cn/en/quickstart) 中的 `Agent + Task + Crew` 范式。  
+每个阶段（查询生成、网页调研、Excel 知识库、反思、最终答复）都被拆为独立 Agent 并复用了现有 Prompt/工具。
+
+运行前请确保安装依赖：
+
+```bash
+pip install crewai crewai-tools pyyaml
+```
+
+执行示例：
+
+```bash
+python -m crewai_app "水冷板行业现状" \
+  --initial-queries 3 \
+  --max-loops 2 \
+  --disable-kb  # 如需关闭 Excel 知识库
+```
+
+命令会读取 `.env`（DashScope、Tavily 等配置）并在终端输出结构化 Markdown，引用格式与 backend 保持一致。
+
 ## 工作流概览
 
 ```mermaid
