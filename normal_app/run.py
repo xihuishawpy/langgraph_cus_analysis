@@ -46,7 +46,8 @@ SECTION_ANALYSIS_REQUIREMENT = """
       "industry": "所属行业/类别",
       "target": "具体产品/对象",
       "features": "来自原文的关键特征或应用描述",
-      "services": ["推荐 TIC 服务方案（使用具体标准或测试名称）"]
+      "services": ["推荐 TIC 服务方案（使用具体标准或测试名称）"],
+      "test_items": ["服务对应的具体检测项目（例如：绝缘耐压测试、IP 防护等级测试、盐雾腐蚀测试等，尽可能详细列出）"]
     }
   ]
 }
@@ -65,6 +66,8 @@ class TicOpportunity(BaseModel):
     target: str
     features: str
     services: List[str] = Field(default_factory=list)
+    # 具体的检测/试验项目名称列表（与服务方案相对应）
+    test_items: List[str] = Field(default_factory=list)
 
 
 class SectionAnalysis(BaseModel):
@@ -137,6 +140,24 @@ def _extract_json(text: str) -> str:
     return text[start : end + 1]
 
 
+def _normalize_section_payload(payload: Any) -> Any:
+    """递归清洗 LLM 返回的 JSON，主要是去掉 key 两侧的空格，避免校验失败。"""
+
+    if isinstance(payload, dict):
+        cleaned: dict[Any, Any] = {}
+        for k, v in payload.items():
+            if isinstance(k, str):
+                k = k.strip()
+            cleaned[k] = _normalize_section_payload(v)
+        # 如果 opportunities 不是列表，直接置空，避免报错
+        if "opportunities" in cleaned and not isinstance(cleaned["opportunities"], list):
+            cleaned["opportunities"] = []
+        return cleaned
+    if isinstance(payload, list):
+        return [_normalize_section_payload(item) for item in payload]
+    return payload
+
+
 def analyze_section(client: OpenAI, model: str, section: Section) -> SectionAnalysis:
     user_prompt = (
         f"章节标题：《{section.title}》\n"
@@ -149,27 +170,31 @@ def analyze_section(client: OpenAI, model: str, section: Section) -> SectionAnal
             {"role": "system", "content": TIC_SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ],
+        # 启用 Qwen3 的 thinking 模式
+        extra_body={"enable_thinking": True},
     )
     raw = _message_content_to_text(resp.choices[0].message.content)
     payload = json.loads(_extract_json(raw.strip()))
+    payload = _normalize_section_payload(payload)
     return SectionAnalysis.model_validate(payload)
 
 
 def render_final_table(analyses: List[SectionAnalysis]) -> str:
-    rows: List[tuple[str, str, str, str]] = []
+    rows: List[tuple[str, str, str, str, str]] = []
     for section in analyses:
         for opp in section.opportunities:
             services = "、".join(opp.services)
-            rows.append((opp.industry, opp.target, opp.features, services))
+            test_items = "、".join(opp.test_items)
+            rows.append((opp.industry, opp.target, opp.features, services, test_items))
 
     if not rows:
         return "未在文本中发现可提取的 TIC 商机。"
 
-    header = "| 所属行业/类别 | 具体产品/对象 | 关键特征/应用场景 | 推荐 TIC 服务方案 |"
-    separator = "| :--- | :--- | :--- | :--- |"
+    header = "| 所属行业/类别 | 具体产品/对象 | 关键特征/应用场景 | 推荐 TIC 服务方案 | 关键检测项目 |"
+    separator = "| :--- | :--- | :--- | :--- | :--- |"
     lines = [header, separator]
-    for industry, target, features, services in rows:
-        lines.append(f"| {industry} | {target} | {features} | {services} |")
+    for industry, target, features, services, test_items in rows:
+        lines.append(f"| {industry} | {target} | {features} | {services} | {test_items} |")
 
     lines.append(f"\n共提取 {len(rows)} 条潜在 TIC 机会。")
     return "\n".join(lines)
@@ -181,13 +206,14 @@ def print_section_analysis(analysis: SectionAnalysis) -> None:
         print("（本章节未发现可提取的 TIC 机会）\n")
         return
 
-    header = "| 所属行业/类别 | 具体产品/对象 | 关键特征/应用场景 | 推荐 TIC 服务方案 |"
-    separator = "| :--- | :--- | :--- | :--- |"
+    header = "| 所属行业/类别 | 具体产品/对象 | 关键特征/应用场景 | 推荐 TIC 服务方案 | 关键检测项目 |"
+    separator = "| :--- | :--- | :--- | :--- | :--- |"
     print(header)
     print(separator)
     for opp in analysis.opportunities:
         services = "、".join(opp.services)
-        print(f"| {opp.industry} | {opp.target} | {opp.features} | {services} |")
+        test_items = "、".join(opp.test_items)
+        print(f"| {opp.industry} | {opp.target} | {opp.features} | {services} | {test_items} |")
     print("")
 
 
@@ -200,7 +226,8 @@ def main() -> None:
     print(f"共检测到 {len(sections)} 个章节，开始逐段调用 LLM...\n")
 
     client = _init_client()
-    model = os.getenv("QWEN_MODEL_NAME", "qwen-plus")
+    # 默认使用 Qwen3-Max 推理模型，可通过环境变量 QWEN_MODEL_NAME 覆盖
+    model = os.getenv("QWEN_MODEL_NAME", "qwen3-max")
     analyses: List[SectionAnalysis] = []
     for section in sections:
         try:
