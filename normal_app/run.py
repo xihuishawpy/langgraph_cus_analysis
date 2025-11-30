@@ -241,6 +241,14 @@ def main() -> None:
     if not analyses:
         raise RuntimeError("未获取任何章节分析结果，无法汇总。")
 
+    # 将所有章节的结构化分析结果保存为 JSON，供后续匹配 xm.pdf 等任务使用
+    base_dir = Path(__file__).resolve().parents[1]
+    json_path = base_dir / "data" / "三安光电_sections.json"
+    payload = [ana.model_dump() for ana in analyses]
+    json_text = json.dumps(payload, ensure_ascii=False, indent=2)
+    json_path.write_text(json_text, encoding="utf-8")
+    print(f"\n章节分析结果已保存到：{json_path}")
+
     print("===== 汇总表格 =====")
     table = render_final_table(analyses)
     print(table)

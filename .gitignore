@@ -7,6 +7,8 @@ uv.lock
 .claude
 
 frontend/
+# 只屏蔽 xm.pdf 文件
+data/xm.pdf
 
 # C extensions
 *.so
