@@ -13,6 +13,7 @@ Usage (from repo root):
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Tuple
 
@@ -76,19 +77,42 @@ def load_analyses_from_json(path: Path) -> List[SectionAnalysis]:
     return [SectionAnalysis.model_validate(item) for item in items]
 
 
-def collect_test_items(analyses: Iterable[SectionAnalysis]) -> List[str]:
-    """Collect unique test_items from all opportunities."""
-    seen: set[str] = set()
-    items: List[str] = []
+@dataclass
+class TestItemContext:
+    """单条检测项目及其上下文信息，用于更稳健的 LLM 匹配。"""
+
+    test_item: str
+    industry: str
+    target: str
+    features: str
+    services: List[str]
+    section_title: str
+
+
+def collect_test_items(analyses: Iterable[SectionAnalysis]) -> List[TestItemContext]:
+    """Collect unique test_items from all opportunities, with context."""
+    seen: set[tuple[str, str, str]] = set()
+    items: List[TestItemContext] = []
     for ana in analyses:
         for opp in ana.opportunities:
             for raw in getattr(opp, "test_items", []) or []:
                 item = raw.strip()
                 if not item:
                     continue
-                if item not in seen:
-                    seen.add(item)
-                    items.append(item)
+                sig = (item, opp.industry, opp.target)
+                if sig in seen:
+                    continue
+                seen.add(sig)
+                items.append(
+                    TestItemContext(
+                        test_item=item,
+                        industry=opp.industry,
+                        target=opp.target,
+                        features=opp.features,
+                        services=list(opp.services or []),
+                        section_title=ana.title,
+                    )
+                )
     return items
 
 
@@ -201,12 +225,12 @@ def find_matches(
 
 
 def _rank_candidates_for_item(
-    item: str,
+    item: TestItemContext,
     records: List[ServiceRecord],
     top_k: int = 8,
 ) -> List[ServiceRecord]:
     """Use simple string similarity to pick top-k candidate service records."""
-    norm_item = item.replace(" ", "").lower()
+    norm_item = item.test_item.replace(" ", "").lower()
     scored: List[Tuple[float, ServiceRecord]] = []
 
     for rec in records:
@@ -228,7 +252,7 @@ def _rank_candidates_for_item(
 def _llm_match_one(
     client,
     model: str,
-    item: str,
+    item_ctx: TestItemContext,
     candidates: List[ServiceRecord],
 ) -> Tuple[str, List[str]]:
     """Ask LLM to judge which candidate service records match the test item.
@@ -236,10 +260,19 @@ def _llm_match_one(
     Returns (test_item, [matched_codes]).
     """
     if not candidates:
-        return item, []
+        return item_ctx.test_item, []
 
-    # 构造用户提示，将每个候选项目的代码和文本都给到模型
-    lines = [f"检测项目：{item}", "", "候选服务项目列表："]
+    # 构造用户提示，将检测项目及其上下文 + 候选服务项目列表都给到模型
+    lines: List[str] = [
+        f"检测项目：{item_ctx.test_item}",
+        f"所属行业/类别：{item_ctx.industry}",
+        f"具体产品/对象：{item_ctx.target}",
+        f"章节标题：{item_ctx.section_title}",
+        f"原文关键特征/应用场景：{item_ctx.features}",
+        "推荐 TIC 服务方案：" + ("；".join(item_ctx.services) if item_ctx.services else "（无）"),
+        "",
+        "候选服务项目列表：",
+    ]
     for idx, rec in enumerate(candidates, start=1):
         lines.append(f"{idx}. [{rec.code}] {rec.text}")
     user_prompt = "\n".join(lines)
@@ -263,11 +296,11 @@ def _llm_match_one(
         if isinstance(code, str) and code.strip():
             codes.append(code.strip())
 
-    return item, codes
+    return item_ctx.test_item, codes
 
 
 def llm_match(
-    test_items: List[str],
+    test_items: List[TestItemContext],
     records: List[ServiceRecord],
     model: str,
 ) -> List[Tuple[str, str, str]]:
@@ -279,12 +312,12 @@ def llm_match(
 
     # 先为每个检测项目挑选若干候选，再用 LLM 精筛
     all_matches: List[Tuple[str, str, str]] = []
-    for item in test_items:
-        candidates = _rank_candidates_for_item(item, records, top_k=8)
+    for item_ctx in test_items:
+        candidates = _rank_candidates_for_item(item_ctx, records, top_k=8)
         try:
-            _, codes = _llm_match_one(client, model, item, candidates)
+            _, codes = _llm_match_one(client, model, item_ctx, candidates)
         except Exception as exc:  # noqa: BLE001
-            print(f"LLM 匹配 '{item}' 失败，跳过：{exc}")
+            print(f"LLM 匹配 '{item_ctx.test_item}' 失败，跳过：{exc}")
             continue
 
         if not codes:
@@ -294,7 +327,7 @@ def llm_match(
         code_set = set(codes)
         for rec in candidates:
             if rec.code in code_set:
-                all_matches.append((item, rec.code, rec.text))
+                all_matches.append((item_ctx.test_item, rec.code, rec.text))
 
     return all_matches
 
@@ -333,9 +366,33 @@ def main() -> None:
     print("===== 使用 LLM 与 xm 报价清单匹配到的检测项目 =====")
     for item, code, text in llm_matches:
         code_str = f"[{code}]" if code else "[未知代码]"
-        print(f"{code_str} {text}  <-- 财报检测项目：{item}")
+        print(f"财报检测项目：{item} ---> {code_str} {text} ")
 
     print(f"\n共匹配到 {len(llm_matches)} 个项目。")
+
+    # 将匹配结果结构化保存到 JSON 文件，便于后续分析或导入其他系统
+    result_by_item: dict[str, dict] = {}
+    for item, code, text in llm_matches:
+        rec = result_by_item.setdefault(
+            item,
+            {
+                "financial_test_item": item,  # 财报推断的检测项目
+                "matches": [],  # 对应 xm.pdf 中的服务/检测项目
+            },
+        )
+        rec["matches"].append(
+            {
+                "code": code,
+                "service_text": text,
+            }
+        )
+
+    output_path = root / "data" / "xm_match_results.json"
+    output_path.write_text(
+        json.dumps(list(result_by_item.values()), ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print(f"\n匹配结果已保存到：{output_path}")
 
 
 if __name__ == "__main__":

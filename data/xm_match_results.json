@@ -1,0 +1,271 @@
+[
+  {
+    "financial_test_item": "高温高湿存储寿命测试",
+    "matches": [
+      {
+        "code": "RA006",
+        "service_text": "RA006 RA THS 温湿度贮存试验第二小时起 max. 300ea/lot hour 13"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "热冲击测试",
+    "matches": [
+      {
+        "code": "RA010",
+        "service_text": "RA010 RA TST_Air to Air 温度冲击试验-气槽式第二小时起 max. 300ea/lot hour 70"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "高低温循环测试",
+    "matches": [
+      {
+        "code": "RA014",
+        "service_text": "RA014 RA TCT_Air to Air 温度循环试验第二小时起 max. 300ea/lot hour 48"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "静电放电（ESD）敏感度测试",
+    "matches": [
+      {
+        "code": "ESD001",
+        "service_text": "ESD001 ESD ESD-CDM ESD测试-充/放电模式 Min. 0.5h/0.5h. hour 650"
+      },
+      {
+        "code": "ESD008",
+        "service_text": "ESD008 ESD ESD I-V Curve (MK4) ESD测试-参数分析 Min. 0.5h/0.25h. hour 1100"
+      },
+      {
+        "code": "ESD007",
+        "service_text": "ESD007 ESD ESD I-V Curve (MK2/HANWA) ESD测试-参数分析 Min. 0.5h/0.25h. hour 650"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "光输出稳定性测试",
+    "matches": [
+      {
+        "code": "RA075",
+        "service_text": "RA075 RA RA Report 可靠性试验报告 copy 500"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "焊接可靠性（剪切力、拉力测试）",
+    "matches": [
+      {
+        "code": "RA068",
+        "service_text": "RA068 RA Wire Bond Pull Test 焊线拉力试验 10wire/lot lot 500"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "湿热老化测试",
+    "matches": [
+      {
+        "code": "RA064",
+        "service_text": "RA064 RA Steam 蒸气老化试验 hour 8"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "ESD 防护等级（HBM/MM）",
+    "matches": [
+      {
+        "code": "ESD003",
+        "service_text": "ESD003 ESD ESD-HBM/MM/LU (MK2) ESD测试-人体放电模式/机器放电模式/栓锁试验(MK2) Min. 0.5h/0.5h. hour 650"
+      },
+      {
+        "code": "ESD004",
+        "service_text": "ESD004 ESD ESD-HBM/MM/LU (MK4) ESD测试-人体放电模式/机器放电模式/栓锁试验(MK4) Min. 0.5h/0.5h. hour 1100"
+      },
+      {
+        "code": "ESD002",
+        "service_text": "ESD002 ESD ESD-HBM/MM/LU (HANWA) ESD测试-人体放电模式/机器放电模式/栓锁试验(HANWA) Min. 0.5h/0.5h. hour 650"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "温度循环与高温工作寿命（HTOL）",
+    "matches": [
+      {
+        "code": "RA014",
+        "service_text": "RA014 RA TCT_Air to Air 温度循环试验第二小时起 max. 300ea/lot hour 48"
+      },
+      {
+        "code": "RA026",
+        "service_text": "RA026 RA BLT 偏压寿命试验第二小时起 80ea/lot hour 13"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "功率循环寿命测试",
+    "matches": [
+      {
+        "code": "RA017",
+        "service_text": "RA017 RA PTC 温度电压循环试验第二小时起 max. 80ea/lot hour 60"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "栅极氧化层可靠性",
+    "matches": [
+      {
+        "code": "FA055",
+        "service_text": "FA055 PFA FA-Delayer-Oxide 失效分析-氧化层去层 layer 240"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "高温反向偏压（HTRB）",
+    "matches": [
+      {
+        "code": "RA026",
+        "service_text": "RA026 RA BLT 偏压寿命试验第二小时起 80ea/lot hour 13"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "湿热存储（85°C/85%RH）",
+    "matches": [
+      {
+        "code": "RA006",
+        "service_text": "RA006 RA THS 温湿度贮存试验第二小时起 max. 300ea/lot hour 13"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "热循环（-55°C to +125°C）",
+    "matches": [
+      {
+        "code": "RA007",
+        "service_text": "RA007 RA THC 温湿度循环试验第二小时起 max. 300ea/lot hour 17"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "引线键合拉力/剪切力",
+    "matches": [
+      {
+        "code": "RA068",
+        "service_text": "RA068 RA Wire Bond Pull Test 焊线拉力试验 10wire/lot lot 500"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "空洞率（X-ray 或 SAT）",
+    "matches": [
+      {
+        "code": "FA072",
+        "service_text": "FA072 MA 3D X-Ray 高分辨率3D X-Ray显微镜 Min. 0.5h hour 2500"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "高温高湿存储试验（85°C/85%RH）",
+    "matches": [
+      {
+        "code": "RA006",
+        "service_text": "RA006 RA THS 温湿度贮存试验第二小时起 max. 300ea/lot hour 13"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "温度循环测试（-40°C~125°C）",
+    "matches": [
+      {
+        "code": "RA014",
+        "service_text": "RA014 RA TCT_Air to Air 温度循环试验第二小时起 max. 300ea/lot hour 48"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "ESD 静电放电抗扰度测试",
+    "matches": [
+      {
+        "code": "ESD003",
+        "service_text": "ESD003 ESD ESD-HBM/MM/LU (MK2) ESD测试-人体放电模式/机器放电模式/栓锁试验(MK2) Min. 0.5h/0.5h. hour 650"
+      },
+      {
+        "code": "ESD004",
+        "service_text": "ESD004 ESD ESD-HBM/MM/LU (MK4) ESD测试-人体放电模式/机器放电模式/栓锁试验(MK4) Min. 0.5h/0.5h. hour 1100"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "高低温工作寿命测试（HTOL/LTOL）",
+    "matches": [
+      {
+        "code": "RA029",
+        "service_text": "RA029 RA HTOL (SSE2206B) 高温寿命试验-SSE2206B 第二小时起 80ea/lot hour 40"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "耐温冲击测试（-40°C ↔ +125°C）",
+    "matches": [
+      {
+        "code": "RA009",
+        "service_text": "RA009 RA TST_Air to Air Set-Up 温度冲击试验-气槽式第一小时设定费 max. 300ea/lot hour 280"
+      },
+      {
+        "code": "RA010",
+        "service_text": "RA010 RA TST_Air to Air 温度冲击试验-气槽式第二小时起 max. 300ea/lot hour 70"
+      },
+      {
+        "code": "RA011",
+        "service_text": "RA011 RA TST_Liquid to Liquid Set-Up 温度冲击试验-液槽式第一小时设定费 max. 300ea/lot hour 280"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "车灯系统EMC测试（CISPR 25）",
+    "matches": [
+      {
+        "code": "RA078",
+        "service_text": "RA078 RA EMC (TEM Cell) 横电磁波传输试验 Min. 0.5h/0.5h. hour 1250"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "连续/脉冲工作模式寿命测试",
+    "matches": [
+      {
+        "code": "RA026",
+        "service_text": "RA026 RA BLT 偏压寿命试验第二小时起 80ea/lot hour 13"
+      },
+      {
+        "code": "RA025",
+        "service_text": "RA025 RA BLT Set-up 偏压寿命试验第一小时设定费 80ea/lot hour 280"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "HTRB/HTGB 高温反偏/栅偏寿命",
+    "matches": [
+      {
+        "code": "RA029",
+        "service_text": "RA029 RA HTOL (SSE2206B) 高温寿命试验-SSE2206B 第二小时起 80ea/lot hour 40"
+      },
+      {
+        "code": "RA028",
+        "service_text": "RA028 RA HTOL (KYE or DI or LM) 高温寿命试验-KYE 或 DI 或 LM 第二小时起 80ea/lot hour 40"
+      },
+      {
+        "code": "RA033",
+        "service_text": "RA033 RA High Power HTOL (MCC HPB5) 高温寿命试验-MCC HPB5 By Board Q'ty slot 22"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "EMC辐射与传导发射",
+    "matches": [
+      {
+        "code": "RA078",
+        "service_text": "RA078 RA EMC (TEM Cell) 横电磁波传输试验 Min. 0.5h/0.5h. hour 1250"
+      }
+    ]
+  }
+]
