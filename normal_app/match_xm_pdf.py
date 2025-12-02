@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Match extracted TIC test items with the xm.pdf service price list.
+"""匹配 xm.pdf 中的服务项目与财报中的检测项目
 
 Usage (from repo root):
 
