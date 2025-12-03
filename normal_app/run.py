@@ -47,11 +47,23 @@ SECTION_ANALYSIS_REQUIREMENT = """
       "target": "具体产品/对象",
       "features": "来自原文的关键特征或应用描述",
       "services": ["推荐 TIC 服务方案（使用具体标准或测试名称）"],
-      "test_items": ["服务对应的具体检测项目（例如：绝缘耐压测试、IP 防护等级测试、盐雾腐蚀测试等，尽可能详细列出）"]
+      "test_items": [
+        "服务对应的具体检测项目名称，需从上述服务方案/标准中细化拆解而来，例如：",
+        "高温贮存试验 (High Temperature Storage Test, JESD22-A103)",
+        "温度循环试验 (Temperature Cycling, JESD22-A104)",
+        "ESD 静电放电测试 (HBM/CDM)",
+        "盐雾腐蚀试验 (Salt Spray Test, ASTM B117)",
+        "IP6X/IPX7 防护等级测试 (IEC 60529)"
+      ]
     }
   ]
 }
-如无可提取内容，opportunities 传回空数组。严禁输出 JSON 以外内容。
+具体要求：
+- 必须“按标准拆分”为可执行的单项测试，test_items 中每一条都应是检测工程师可以单独下单/执行的测试项目，而不是标准或方案本身的名字。
+- 优先依据文本中已经提到的标准/法规/测试名称（如 IEC / UL / AEC-Q / ASTM 等），结合行业惯例给出 3–8 条最核心、最常用的试验项目。
+- 如无明确标准号，但可以从场景强烈推断出典型测试项目（如车规功率器件 → HTRB/HTGB/功率循环 等），可以据此给出合理的 test_items。
+- 如无可提取内容，则 opportunities 传回空数组；若存在机会但无法确定具体试验，则该机会的 test_items 传回空数组。
+严禁输出 JSON 以外内容。
 """
 
 
