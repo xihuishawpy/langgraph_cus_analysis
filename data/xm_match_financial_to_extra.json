@@ -1,0 +1,131 @@
+[
+  {
+    "financial_test_item": "位错密度检测 (Dislocation Density Measurement)",
+    "matches": [
+      {
+        "lab_project_code": "TEM/EDX",
+        "lab_project_description": "TEM/EDX"
+      },
+      {
+        "lab_project_code": "TEM/EDX",
+        "lab_project_description": "TEM/EDX"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "化学成分纯度分析 (Elemental Impurity Analysis)",
+    "matches": [
+      {
+        "lab_project_code": "TEM/EDX",
+        "lab_project_description": "TEM/EDX"
+      },
+      {
+        "lab_project_code": "SEM/EDX",
+        "lab_project_description": "SEM/EDX"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "外延层厚度与组分均匀性测试 (Epilayer Thickness and Composition Uniformity)",
+    "matches": [
+      {
+        "lab_project_code": "XPS/ESCA",
+        "lab_project_description": "XPS/ESCA"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "高温漏电流测试 (High Temperature Leakage Current Test)",
+    "matches": [
+      {
+        "lab_project_code": "I-V curve 量测",
+        "lab_project_description": "I-V curve 量测"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "表面缺陷密度检测 (Surface Defect Density Inspection)",
+    "matches": [
+      {
+        "lab_project_code": "SEM/EDX",
+        "lab_project_description": "SEM/EDX"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "表面金属污染检测 (Surface Metallic Contamination Analysis)",
+    "matches": [
+      {
+        "lab_project_code": "SEM/EDX",
+        "lab_project_description": "SEM/EDX"
+      },
+      {
+        "lab_project_code": "TEM/EDX",
+        "lab_project_description": "TEM/EDX"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "表面划痕与颗粒检测 (Surface Scratch and Particle Inspection)",
+    "matches": [
+      {
+        "lab_project_code": "SEM/EDX",
+        "lab_project_description": "SEM/EDX"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "表面缺陷密度检测 (Surface Defect Density Count)",
+    "matches": [
+      {
+        "lab_project_code": "SEM/EDX",
+        "lab_project_description": "SEM/EDX"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "X射线双晶衍射摇摆曲线测试 (XRD Rocking Curve)",
+    "matches": [
+      {
+        "lab_project_code": "X光绕射分析仪",
+        "lab_project_description": "X光绕射分析仪"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "Rds(on) 稳定性测试 (Drain-Source On-Resistance Stability)",
+    "matches": [
+      {
+        "lab_project_code": "I-V curve 量测",
+        "lab_project_description": "I-V curve 量测"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "VF/IR 参数漂移测试 (Forward Voltage / Reverse Leakage Drift)",
+    "matches": [
+      {
+        "lab_project_code": "I-V curve 量测",
+        "lab_project_description": "I-V curve 量测"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "阈值电流与斜率效率测试 (Threshold Current and Slope Efficiency Test)",
+    "matches": [
+      {
+        "lab_project_code": "I-V curve 量测",
+        "lab_project_description": "I-V curve 量测"
+      }
+    ]
+  },
+  {
+    "financial_test_item": "逆变器效率与电能质量测试",
+    "matches": [
+      {
+        "lab_project_code": "I-V curve 量测",
+        "lab_project_description": "I-V curve 量测"
+      }
+    ]
+  }
+]

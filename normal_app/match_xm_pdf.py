@@ -55,6 +55,37 @@ LLM_MATCH_SYSTEM_PROMPT = """
 """
 
 
+# 额外的“实验室项目描述”列表，用于与财报检测项目做额外匹配
+EXTRA_PROJECT_DESCRIPTIONS: List[str] = [
+    "TEM/EDX",
+    "定点X-S TEM样品制备(N-Si)",
+    "SIMS-元素分析",
+    "二次离子质谱仪 7f",
+    "FIB-FA(高)",
+    "非定点X-S TEM样品制备(N-Si)",
+    "Engineering Charge 工程费用",
+    "SIMS定点样品制备",
+    "定点SEM样品制备",
+    "SEM/EDX",
+    "热影像分析仪",
+    "定点展阻分析仪",
+    "拉曼光谱分析-委外",
+    "高解析度3D X-Ray显微镜",
+    "XPS/ESCA",
+    "X光绕射分析仪",
+    "非定点展阻分析仪",
+    "PCB layer 研磨",
+    "离子束截面研磨 Normally",
+    "超高解析3D光学显微镜",
+    "InGaAs 微光显微镜",
+    "Others-特殊样品制备",
+    "开盖後补线",
+    "I-V curve 量测",
+    "特殊取晶粒(PCB、CIS…)",
+    "取晶粒 一般件",
+]
+
+
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -87,6 +118,50 @@ class TestItemContext:
     features: str
     services: List[str]
     section_title: str
+
+
+def match_test_items_to_extra(
+    test_items: List[TestItemContext],
+    extra_descriptions: List[str],
+    model: str,
+) -> List[Tuple[str, str, str]]:
+    """使用 LLM 将财报检测项目与实验室项目描述做语义匹配。
+
+    返回 (financial_test_item, lab_project_code, lab_project_description) 列表。
+    这里复用 _llm_match_one 的思路，将实验室项目列表包装成候选“服务项目”。
+    """
+    client = _init_client()
+
+    # 将实验室项目列表包装成 ServiceRecord，code 就直接使用描述文本本身
+    extra_records: List[ServiceRecord] = []
+    for desc in extra_descriptions:
+        text = (desc or "").strip()
+        if not text:
+            continue
+        extra_records.append(ServiceRecord(code=text, lines=[text]))
+
+    all_matches: List[Tuple[str, str, str]] = []
+    for item_ctx in test_items:
+        # 先用简单相似度筛一轮候选，再交给 LLM 精筛，避免一次塞太多内容
+        candidates = _rank_candidates_for_item(item_ctx, extra_records, top_k=8)
+        if not candidates:
+            continue
+
+        try:
+            _, codes = _llm_match_one(client, model, item_ctx, candidates)
+        except Exception as exc:  # noqa: BLE001
+            print(f"LLM 匹配财报项目 '{item_ctx.test_item}' 到实验室项目失败，跳过：{exc}")
+            continue
+
+        if not codes:
+            continue
+
+        code_set = set(codes)
+        for rec in candidates:
+            if rec.code in code_set:
+                all_matches.append((item_ctx.test_item, rec.code, rec.text))
+
+    return all_matches
 
 
 def collect_test_items(analyses: Iterable[SectionAnalysis]) -> List[TestItemContext]:
@@ -377,7 +452,7 @@ def main() -> None:
             item,
             {
                 "financial_test_item": item,  # 财报推断的检测项目
-                "matches": [],  # 对应 xm.pdf 中的服务/检测项目
+                "matches": [],  # 对应 xm.pdf 中的服务/检测项目（可能有多个）
             },
         )
         rec["matches"].append(
@@ -393,6 +468,114 @@ def main() -> None:
         encoding="utf-8",
     )
     print(f"\n匹配结果已保存到：{output_path}")
+
+    # 额外导出为 Excel / CSV，方便在表格中查看与筛选
+    # 行粒度为「一条财报检测项目与 xm.pdf 中的一个服务项目」。
+    try:
+        import pandas as pd
+
+        rows: List[dict[str, str]] = []
+        for item, code, text in llm_matches:
+            rows.append(
+                {
+                    "financial_test_item": item,
+                    "xm_service_code": code,
+                    "xm_service_text": text,
+                }
+            )
+
+        if rows:
+            df = pd.DataFrame(rows)
+            excel_path = root / "data" / "xm_match_results.xlsx"
+            try:
+                # 默认使用 openpyxl / xlsxwriter 引擎，如未安装则降级为 CSV
+                df.to_excel(excel_path, index=False)
+                print(f"匹配结果已导出为 Excel：{excel_path}")
+            except Exception as exc:  # noqa: BLE001
+                csv_path = root / "data" / "xm_match_results.csv"
+                # 使用 utf-8-sig 方便在 Excel 中直接打开
+                df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+                print(
+                    "写入 Excel 文件失败，已降级导出为 CSV："
+                    f"{csv_path}（错误信息：{exc}）"
+                )
+        else:
+            print("没有匹配结果，不生成 Excel/CSV 文件。")
+    except Exception as exc:  # noqa: BLE001
+        print(f"导出 Excel/CSV 时出现异常：{exc}")
+
+    # =========================
+    # 额外：财报检测项目 ↔ 实验室项目描述（LLM 语义匹配）
+    # =========================
+    print("\n开始对财报检测项目与自定义实验室项目列表进行 LLM 语义匹配...\n")
+    extra_llm_matches = match_test_items_to_extra(
+        test_items, EXTRA_PROJECT_DESCRIPTIONS, model=model
+    )
+
+    print("===== 财报检测项目 与 自定义实验室项目 的匹配结果（LLM） =====")
+    for fin_item, lab_code, lab_text in extra_llm_matches:
+        code_str = f"[{lab_code}]" if lab_code else "[未知代码]"
+        print(f"财报检测项目：{fin_item}  ---> 实验室项目：{code_str} {lab_text}")
+
+    print(f"\n财报检测项目与自定义列表共产生 {len(extra_llm_matches)} 条 LLM 匹配记录。")
+
+    # 保存为 JSON（按财报检测项目聚合）
+    extra_result_by_item: dict[str, dict] = {}
+    for fin_item, lab_code, lab_text in extra_llm_matches:
+        rec = extra_result_by_item.setdefault(
+            fin_item,
+            {
+                "financial_test_item": fin_item,
+                "matches": [],
+            },
+        )
+        rec["matches"].append(
+            {
+                "lab_project_code": lab_code,
+                "lab_project_description": lab_text,
+            }
+        )
+
+    extra_json_path = root / "data" / "xm_match_financial_to_extra.json"
+    extra_json_path.write_text(
+        json.dumps(list(extra_result_by_item.values()), ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print(f"\n财报检测项目与自定义实验室项目的 LLM 匹配结果已保存到：{extra_json_path}")
+
+    # 保存为 Excel / CSV（逐行展开）
+    try:
+        import pandas as pd
+
+        if extra_llm_matches:
+            extra_rows: List[dict[str, object]] = []
+            for fin_item, lab_code, lab_text in extra_llm_matches:
+                extra_rows.append(
+                    {
+                        "financial_test_item": fin_item,
+                        "lab_project_code": lab_code,
+                        "lab_project_description": lab_text,
+                    }
+                )
+
+            extra_df = pd.DataFrame(extra_rows)
+            extra_excel_path = root / "data" / "xm_match_financial_to_extra.xlsx"
+            try:
+                extra_df.to_excel(extra_excel_path, index=False)
+                print(
+                    f"财报检测项目与自定义实验室项目的 LLM 匹配结果已导出为 Excel：{extra_excel_path}"
+                )
+            except Exception as exc:  # noqa: BLE001
+                extra_csv_path = root / "data" / "xm_match_financial_to_extra.csv"
+                extra_df.to_csv(extra_csv_path, index=False, encoding="utf-8-sig")
+                print(
+                    "写入财报↔自定义实验室项目 Excel 文件失败，已降级导出为 CSV："
+                    f"{extra_csv_path}（错误信息：{exc}）"
+                )
+        else:
+            print("财报检测项目与自定义列表无有效 LLM 匹配，不生成额外的 Excel/CSV 文件。")
+    except Exception as exc:  # noqa: BLE001
+        print(f"导出财报↔自定义实验室项目 Excel/CSV 时出现异常：{exc}")
 
 
 if __name__ == "__main__":

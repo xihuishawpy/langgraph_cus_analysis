@@ -13,165 +13,210 @@
       {
         "industry": "半导体/光电子",
         "target": "LED（发光二极管）",
-        "features": "利用固体半导体芯片作为发光材料，直接发出红、黄、蓝、绿、青、橙、紫、白色的光",
+        "features": "利用固体半导体芯片作为发光材料，直接发出多种颜色的光",
         "services": [
           "IEC 60838 灯具安全系列标准",
-          "LM-79 光电性能测试",
-          "LM-80 LED 光通维持率测试"
+          "GB 7000 系列灯具安全要求",
+          "UL 8750 LED 光源安全标准"
         ],
         "test_items": [
-          "初始光通量测试 (Initial Luminous Flux, IES LM-79)",
-          "色度坐标与显色指数测试 (Chromaticity Coordinates & CRI, IES LM-79)",
-          "LED 光通维持率测试 (Lumen Maintenance, IES LM-80)",
-          "热冲击试验 (Thermal Shock Test, IEC 60068-2-14)",
-          "高温高湿存储试验 (Temperature/Humidity Storage, IEC 60068-2-78)"
+          "电气强度试验 (Dielectric Strength Test)",
+          "泄漏电流测试 (Leakage Current Test)",
+          "温升试验 (Temperature Rise Test)",
+          "光生物安全评估 (Photobiological Safety Assessment)",
+          "寿命测试 (Lumen Maintenance and Lifetime Test)"
         ]
       },
       {
-        "industry": "半导体/显示技术",
+        "industry": "半导体/微显示",
         "target": "Micro LED",
         "features": "尺寸通常在50微米以内，通过高精度巨量转移技术排列成显示模组",
         "services": [
-          "AEC-Q102 车规级光电器件可靠性认证",
-          "JEDEC JESD22 系列环境应力测试"
+          "车规级显示器件可靠性验证 (AEC-Q104)",
+          "消费电子显示模组环境适应性测试"
         ],
         "test_items": [
-          "高温反向偏压寿命试验 (HTRB, AEC-Q102)",
-          "高温高湿反向偏压试验 (H3TRB, AEC-Q102)",
-          "温度循环试验 (Temperature Cycling, JESD22-A104)",
-          "机械冲击试验 (Mechanical Shock, JESD22-B104)",
-          "静电放电测试 - HBM (Human Body Model, ANSI/ESDA/JEDEC JS-001)"
+          "高温高湿存储试验 (High Temperature High Humidity Storage)",
+          "温度冲击试验 (Thermal Shock Test)",
+          "机械振动试验 (Mechanical Vibration Test)",
+          "ESD 静电放电测试 (ESD Test, HBM/CDM)",
+          "点亮寿命与亮度衰减测试 (Operational Lifetime and Luminance Degradation)"
         ]
       },
       {
-        "industry": "半导体/显示技术",
+        "industry": "半导体/微显示",
         "target": "Mini LED",
         "features": "晶粒尺寸约在100微米，介于传统LED与Micro LED之间",
         "services": [
-          "IEC 62031 LED模块安全要求",
-          "IES LM-79/LM-80 光电性能与寿命评估"
+          "背光模组可靠性测试",
+          "消费电子用Mini LED环境适应性验证"
         ],
         "test_items": [
-          "光效与功率测试 (Luminous Efficacy & Power, IES LM-79)",
-          "色温一致性测试 (Correlated Color Temperature Uniformity)",
-          "高温工作寿命试验 (High Temperature Operating Life, HTOL)",
-          "冷热冲击试验 (Thermal Shock, IEC 60068-2-14)",
-          "湿度敏感等级测试 (Moisture Sensitivity Level, IPC/JEDEC J-STD-020)"
+          "高低温循环试验 (Temperature Cycling)",
+          "恒定湿热试验 (Damp Heat Test)",
+          "光色一致性测试 (Chromaticity Uniformity Test)",
+          "驱动电流耐受性测试 (Current Overstress Test)",
+          "点亮老化试验 (Burn-in Test)"
         ]
       },
       {
-        "industry": "半导体/射频器件",
-        "target": "射频前端（含PA、滤波器、开关等）",
-        "features": "包括射频功率放大器、滤波器、双工器、开关、低噪声放大器等，用于通信设备",
+        "industry": "半导体/电力电子",
+        "target": "功率器件（IGBT、SBD、Power MOSFET）",
+        "features": "用于电能变换和控制，电流数十至数千安，电压数百伏以上",
         "services": [
-          "AEC-Q100 车规集成电路认证",
-          "IEC 62391 射频器件可靠性",
-          "GR-468-CORE 光电/射频器件可靠性"
+          "AEC-Q101 车规分立器件可靠性认证",
+          "JEDEC JEP184 功率器件可靠性指南"
         ],
         "test_items": [
-          "高温栅偏置试验 (HTGB, AEC-Q100)",
-          "高温反向偏压试验 (HTRB, AEC-Q101 for discrete RF devices)",
-          "功率循环试验 (Power Cycling, JEDEC JEP122)",
-          "ESD 静电放电测试 - CDM (Charged Device Model, JS-002)",
-          "射频参数稳定性测试（如S参数漂移，IEC 62047）"
+          "高温反偏试验 (HTRB - High Temperature Reverse Bias)",
+          "高温栅极偏压试验 (HTGB - High Temperature Gate Bias)",
+          "功率循环试验 (Power Cycling Test)",
+          "短路耐受能力测试 (Short Circuit Withstand Test)",
+          "雪崩能量测试 (Unclamped Inductive Switching Test)"
         ]
       },
       {
-        "industry": "电力电子/第三代半导体",
-        "target": "SiC（碳化硅）功率器件",
-        "features": "用于电力电子器件、射频领域，具有高电压、大电流能力",
+        "industry": "半导体/射频通信",
+        "target": "射频前端模块（含PA、滤波器、开关等）",
+        "features": "包含射频功率放大器、滤波器、双工器、开关、低噪声放大器等",
         "services": [
-          "AEC-Q101 车规分立半导体器件认证",
-          "JEDEC JEP122 功率器件可靠性指南"
+          "AEC-Q100/Q200 车规IC/无源器件认证",
+          "3GPP 射频性能一致性测试"
         ],
         "test_items": [
-          "高温反向偏压寿命试验 (HTRB, AEC-Q101)",
-          "高温栅偏置试验 (HTGB, AEC-Q101 for MOSFETs)",
-          "功率循环试验 (Active Power Cycling, JEP122)",
-          "雪崩能量耐受测试 (Unclamped Inductive Switching, UIS)",
-          "热阻测试 (Thermal Resistance, Rth, JEDEC JESD51 series)"
+          "射频输出功率稳定性测试 (RF Output Power Stability)",
+          "谐波与杂散发射测试 (Harmonic and Spurious Emission Test)",
+          "温度循环下的S参数测试 (S-Parameter Drift under Thermal Cycling)",
+          "ESD 静电放电测试 (ESD Test, HBM/CDM)",
+          "机械冲击与振动下的性能保持性测试 (Performance Retention under Mechanical Shock/Vibration)"
         ]
       },
       {
-        "industry": "电力电子/第三代半导体",
-        "target": "GaN（氮化镓）高频微波器件",
-        "features": "应用于高频微波器件、高温大功率器件，具有高热导率、化学稳定性好",
+        "industry": "半导体材料",
+        "target": "SiC（碳化硅）",
+        "features": "第三代半导体材料，用于半导体照明、电力电子、射频领域",
         "services": [
-          "AEC-Q101",
-          "MIL-STD-750 电子器件测试方法",
-          "JEDEC JEP183 GaN可靠性指南"
+          "材料纯度与晶体缺陷分析",
+          "车规/工规器件用SiC衬底质量验证"
         ],
         "test_items": [
-          "动态导通电阻测试 (Dynamic Rds(on) Degradation)",
-          "长期直流偏置可靠性试验 (DC Bias Stress Test)",
-          "高温高湿反向偏压试验 (H3TRB, AEC-Q101)",
-          "栅极可靠性测试（Vgs stress）",
-          "热载流子注入退化测试 (Hot Carrier Injection, HCI)"
+          "位错密度检测 (Dislocation Density Measurement)",
+          "电阻率均匀性测试 (Resistivity Uniformity Test)",
+          "表面粗糙度与颗粒污染检测 (Surface Roughness and Particle Count)",
+          "热导率测试 (Thermal Conductivity Measurement)",
+          "化学成分纯度分析 (Elemental Impurity Analysis)"
         ]
       },
       {
-        "industry": "光通信/化合物半导体",
-        "target": "InP（磷化铟）光通信芯片",
-        "features": "用于微波及光通信领域，具有高电子迁移率、大禁带宽度",
+        "industry": "半导体材料",
+        "target": "GaN（氮化镓）",
+        "features": "宽直接带隙、高热导率、化学稳定性好，用于光电子、高频微波器件",
         "services": [
-          "Telcordia GR-468-CORE 光器件可靠性",
-          "IEC 62047 MEMS/光子器件测试"
+          "外延片质量评估",
+          "高频器件用GaN材料可靠性筛查"
         ],
         "test_items": [
-          "长期老化试验（85°C/85%RH 或 70°C 高温老化）",
-          "眼图与误码率测试（BER/Eye Diagram, IEEE 802.3）",
-          "热循环对光耦合稳定性影响测试",
-          "激光器阈值电流漂移测试",
-          "光纤连接器插拔耐久性测试 (IEC 61300-2-1)"
+          "外延层厚度与组分均匀性测试 (Epilayer Thickness and Composition Uniformity)",
+          "载流子浓度与迁移率测试 (Carrier Concentration and Mobility)",
+          "击穿电压测试 (Breakdown Voltage Test)",
+          "高温漏电流测试 (High Temperature Leakage Current Test)",
+          "表面缺陷密度检测 (Surface Defect Density Inspection)"
         ]
       },
       {
-        "industry": "光通信/声表面波器件",
-        "target": "LT/LN（钽酸锂/铌酸锂）声表面波滤波器",
-        "features": "用于SAW滤波器、光通信、激光及光电子领域，具压电、声光性能",
+        "industry": "半导体材料",
+        "target": "GaAs（砷化镓）",
+        "features": "用于光电子、光通信芯片、微波射频器件和高速数字电路",
         "services": [
-          "IEC 60122 压电陶瓷器件测试",
-          "MIL-PRF-3098 SAW器件规范"
+          "化合物半导体衬底质量控制",
+          "光通信器件材料合规性验证"
         ],
         "test_items": [
-          "中心频率与带宽稳定性测试（随温度变化）",
-          "插入损耗与带外抑制测试",
-          "高温存储试验 (150°C, 1000h, IEC 60068-2-2)",
-          "振动试验 (Random Vibration, MIL-STD-202 Method 214)",
-          "静电放电敏感度测试 (ESD Sensitivity, HBM)"
+          "晶体完整性X射线衍射测试 (XRD for Crystal Perfection)",
+          "少数载流子寿命测试 (Minority Carrier Lifetime Measurement)",
+          "表面金属污染检测 (Surface Metallic Contamination Analysis)",
+          "翘曲度与厚度测试 (Wafer Warp and Thickness Measurement)",
+          "光学透过率测试 (Optical Transmittance Test)"
         ]
       },
       {
-        "industry": "半导体衬底材料",
-        "target": "Sapphire/Al2O3（蓝宝石衬底）",
-        "features": "用于LED照明衬底，硬度高、透光性好、热稳定性好，可加工至纳米精度",
+        "industry": "半导体材料",
+        "target": "InP（磷化铟）",
+        "features": "电子迁移率高、禁带宽度大，用于微波及光通信领域",
         "services": [
-          "ASTM F2671 蓝宝石晶片几何参数",
-          "SEMI M1/M2 半导体材料规范"
+          "光通信外延片材料验证",
+          "高频器件衬底质量评估"
         ],
         "test_items": [
-          "晶片厚度与TTV（总厚度偏差）测量 (ASTM F2671)",
-          "翘曲度（Bow）与弯曲度（Warp）测试 (SEMI MF657)",
-          "表面粗糙度测试（Ra/Rq, AFM or profilometer）",
-          "透光率光谱测试（400–700nm range）",
-          "晶体取向XRD测试（C-plane/A-plane确认）"
+          "电子迁移率测试 (Electron Mobility Measurement)",
+          "位错密度检测 (Dislocation Density Measurement)",
+          "表面平整度测试 (Surface Flatness Test)",
+          "红外透过率测试 (IR Transmittance Test)",
+          "热膨胀系数匹配性测试 (Coefficient of Thermal Expansion Matching)"
         ]
       },
       {
-        "industry": "集成电路封装",
-        "target": "封装后的芯片（Die with package）",
-        "features": "通过划片、贴装、引线键合、塑封等工艺完成封装保护",
+        "industry": "半导体材料",
+        "target": "Sapphire/Al2O3（蓝宝石）",
+        "features": "硬度高、透光性好、热稳定性好，用于LED照明衬底",
         "services": [
-          "IPC-A-610 电子组件可接受性",
-          "JESD22-B101 外部目检",
-          "J-STD-002 可焊性测试"
+          "LED衬底材料质量控制",
+          "光学窗口材料性能验证"
         ],
         "test_items": [
-          "引线键合拉力测试 (Wire Bond Pull Test, MIL-STD-883 Method 2011)",
-          "塑封体气密性测试（非气密封装则做PCT）",
-          "压力锅试验 (PCT, Pressure Cooker Test, JESD22-A102)",
-          "可焊性测试（Solderability, J-STD-002）",
-          "X射线空洞率分析（针对底部填充或焊点）"
+          "透光率测试（可见光及近紫外波段）(Transmittance Test)",
+          "维氏硬度测试 (Vickers Hardness Test)",
+          "热冲击 resistance 测试 (Thermal Shock Resistance Test)",
+          "表面划痕与颗粒检测 (Surface Scratch and Particle Inspection)",
+          "晶向取向精度测试 (Crystal Orientation Accuracy)"
+        ]
+      },
+      {
+        "industry": "半导体材料",
+        "target": "LT/LN（钽酸锂/铌酸锂）",
+        "features": "压电、铁电、声光、电光性能，用于SAW滤波器、光通信、激光",
+        "services": [
+          "声表面波器件用基片材料验证",
+          "光调制器晶体性能测试"
+        ],
+        "test_items": [
+          "压电常数测试 (Piezoelectric Coefficient Measurement)",
+          "介电常数与损耗角正切测试 (Dielectric Constant and Loss Tangent)",
+          "光学折射率均匀性测试 (Refractive Index Uniformity)",
+          "居里温度测试 (Curie Temperature Measurement)",
+          "表面声波传播损耗测试 (SAW Propagation Loss Test)"
+        ]
+      },
+      {
+        "industry": "半导体制造",
+        "target": "外延片",
+        "features": "在衬底上生长特定单晶薄膜（In、Ga、Al、P等）",
+        "services": [
+          "外延层质量控制",
+          "化合物半导体工艺一致性验证"
+        ],
+        "test_items": [
+          "外延层厚度均匀性测试 (Thickness Uniformity Mapping)",
+          "掺杂浓度分布测试 (Doping Profile Measurement)",
+          "表面缺陷密度检测 (Surface Defect Density Count)",
+          "光致发光谱测试 (Photoluminescence Spectroscopy)",
+          "X射线双晶衍射摇摆曲线测试 (XRD Rocking Curve)"
+        ]
+      },
+      {
+        "industry": "半导体封装",
+        "target": "封装（含Die贴装、引线键合、塑封）",
+        "features": "将晶片贴装到基板，用金属线或树脂连接，塑料外壳封装",
+        "services": [
+          "JEDEC 封装可靠性标准",
+          "IPC 封装工艺质量控制"
+        ],
+        "test_items": [
+          "引线键合拉力/剪切力测试 (Wire Bond Pull/Shear Test)",
+          "塑封体空洞率检测 (Void Content in Molding Compound)",
+          "分层检测（声学扫描）(Delamination Inspection by SAT)",
+          "可焊性测试 (Solderability Test)",
+          "封装气密性测试（非气密封装适用）(Moisture Ingress Test)"
         ]
       }
     ]
@@ -185,222 +230,227 @@
     "opportunities": [
       {
         "industry": "LED / 显示技术",
-        "target": "Mini LED 背光芯片（用于电视、显示器、车载显示等）",
-        "features": "应用于电视、显示器、笔记本电脑、车载显示、VR等领域；技术成熟、成本优化；在MM006、YH004、YR003等国际大客户处份额提升",
+        "target": "Mini LED 背光芯片（用于电视、显示器、笔记本、车载显示、VR）",
+        "features": "应用于电视、显示器、笔记本电脑、车载显示、VR等领域；技术成熟、成本优化、市场需求快速发展；在MM006、YH004、YR003等国际大客户处份额提升",
         "services": [
-          "IEC 62717 LED模块性能测试",
-          "LM-80 LED光源流明维持率测试",
-          "TM-21 LED寿命推算",
-          "JEDEC JESD22 环境可靠性测试"
+          "IEC 62717 (LED模块性能)",
+          "LM-80 (LED光源流明维持率)",
+          "TM-21 (寿命推算)",
+          "JEDEC JESD22 系列环境可靠性测试"
         ],
         "test_items": [
-          "高温高湿工作寿命试验 (HTOL, JESD22-A101)",
-          "温度循环试验 (Temperature Cycling, JESD22-A104)",
-          "冷热冲击试验 (Thermal Shock, JESD22-A106)",
-          "光通量维持率测试 (Luminous Flux Maintenance, IES LM-80)",
-          "色度稳定性测试 (Chromaticity Shift over Time)",
-          "静电放电抗扰度测试 (ESD Immunity, IEC 61000-4-2)"
+          "高温高湿工作寿命试验 (High Temperature High Humidity Operating Life Test)",
+          "温度循环试验 (Temperature Cycling)",
+          "高温贮存试验 (High Temperature Storage Test)",
+          "冷热冲击试验 (Thermal Shock Test)",
+          "光通量维持率测试 (Lumen Maintenance Test)",
+          "色度稳定性测试 (Chromaticity Shift Test)"
         ]
       },
       {
-        "industry": "Micro LED / AR/VR",
-        "target": "Micro LED 芯片（用于AR眼镜、穿戴设备、高端电视）",
-        "features": "微缩化、均匀性、光效提升；应用于穿戴、AR眼镜、车载显示、高端电视；MiP产品获客户认可",
+        "industry": "Micro LED / 微显示",
+        "target": "Micro LED 芯片（用于穿戴、AR眼镜、车载显示、高端电视、商用显示）",
+        "features": "微缩化、均匀性、光效提升等核心技术突破；应用于穿戴、AR眼镜、车载显示、高端电视、商用显示；中大型显示领域已稳定出货；MiP产品获客户认可",
         "services": [
-          "AEC-Q102 汽车级光电器件认证",
-          "JEDEC JESD22 可靠性测试",
-          "ISO 10995 Micro LED光学性能评估"
+          "ISO 9001 (质量管理体系)",
+          "IEC 62341 (OLED/LED显示器件)",
+          "定制化Micro LED可靠性验证方案"
         ],
         "test_items": [
-          "高加速应力测试 (HAST, JESD22-A110)",
-          "高温反向偏压寿命试验 (HTRB, JESD22-A108)",
-          "波长均匀性测试 (Wavelength Uniformity Mapping)",
-          "微像素点亮率与缺陷密度检测 (Pixel Yield & Defect Inspection)",
-          "视场角与亮度一致性测试（针对AR应用）",
-          "机械振动试验 (Mechanical Vibration, JESD22-B104)"
+          "像素点亮率与坏点检测 (Pixel Defect and On-Pixel Rate Test)",
+          "波长均匀性测试 (Wavelength Uniformity Test)",
+          "亮度均匀性测试 (Luminance Uniformity Test)",
+          "高温高湿偏压寿命试验 (HTHB Test)",
+          "机械应力测试 (Mechanical Stress Test for Wearables)",
+          "视场角与光学串扰测试 (FOV and Optical Crosstalk Test)"
         ]
       },
       {
-        "industry": "汽车电子 / 车灯",
-        "target": "车用LED前照灯、氛围灯、尾灯",
-        "features": "技术追齐国际一线；新增奇瑞、路特斯、大众、理想等车企及Tier 1客户；出货前照灯、氛围灯比重上升；协同WIPAC获宾利、劳斯莱斯项目",
+        "industry": "汽车电子 / 车规照明",
+        "target": "车用LED（前照灯、氛围灯、尾灯等）",
+        "features": "技术能力追齐国际一线水平；新增多家知名车企及Tier 1客户；应用于奇瑞、路特斯、大众、理想、宾利、劳斯莱斯等车型；智能驾驶和车内外环境改善相关",
         "services": [
-          "ECE R128 车辆照明法规认证",
-          "SAE J575 车灯环境测试",
-          "AEC-Q102 汽车级LED可靠性认证",
-          "ISO 16750 车载电子环境可靠性"
+          "AEC-Q102 (车用光电器件认证)",
+          "ISO 16750 (道路车辆环境条件)",
+          "ECE R112/R87 (车灯法规)"
         ],
         "test_items": [
-          "高低温循环工作寿命测试 (-40°C to +125°C, ISO 16750-4)",
-          "耐湿热循环试验 (Humidity Cycling, SAE J575)",
-          "盐雾腐蚀试验 (Salt Spray Test, ASTM B117)",
-          "IP6K9K 防护等级测试 (IEC 60529)",
-          "光强分布与配光曲线测试 (Photometric Testing per ECE R128)",
-          "抗机械冲击测试 (Mechanical Shock, ISO 16750-3)"
+          "高温反向偏压寿命试验 (HTRB Test)",
+          "温度循环试验 (Temperature Cycling, -40℃~125℃)",
+          "振动与机械冲击测试 (Vibration and Mechanical Shock Test)",
+          "耐候性与UV老化测试 (Weathering and UV Aging Test)",
+          "结温与热阻测试 (Junction Temperature and Thermal Resistance Test)",
+          "光色参数稳定性测试 (Photometric and Chromatic Stability Test)"
         ]
       },
       {
-        "industry": "健康/环保 / UV/IR LED",
-        "target": "紫外（UV）和红外（IR）LED系列产品",
-        "features": "性能领先；应用于健康医疗、工业水处理、手机遥控、穿戴腕表、工业固化",
+        "industry": "健康与环保",
+        "target": "紫外（UV）LED（用于健康医疗、工业水处理、固化）",
+        "features": "红外、紫外系列产品性能领先；应用于健康医疗、工业水处理、工业固化等领域",
         "services": [
-          "IEC 62471 光生物安全评估",
-          "FDA 21 CFR 1040.10（如用于医疗）",
-          "UL 8800 UV设备安全标准",
-          "GB/T 39626-2020 紫外LED性能测试"
+          "IEC 62471 (光生物安全)",
+          "NSF/ANSI 55 (紫外线水处理设备)",
+          "FDA 21 CFR (医疗器械相关)"
         ],
         "test_items": [
-          "紫外辐射强度与波长分布测试 (UV Irradiance Spectral Measurement)",
-          "光生物危害等级评估 (Photobiological Safety, IEC TR 62471)",
-          "臭氧产生量测试（如UVC用于水处理）",
-          "热稳定性与老化衰减测试 (Thermal Aging under Operating Conditions)",
-          "电气安全绝缘耐压测试 (Dielectric Withstand Voltage, UL 8800)",
-          "材料生物相容性测试（如接触人体，ISO 10993系列）"
+          "UVC输出功率与波长验证 (UVC Output Power and Peak Wavelength Verification)",
+          "光生物安全等级评估 (Photobiological Safety Assessment)",
+          "材料耐UV老化测试 (UV Resistance of Housing Materials)",
+          "臭氧产生量测试 (Ozone Generation Test)",
+          "水处理杀菌效能验证 (Microbial Inactivation Efficacy Test)"
         ]
       },
       {
-        "industry": "农业照明",
-        "target": "植物照明LED产品",
-        "features": "技术突破；填补中高端市场需求；用于城市农业、园艺、花卉种植",
+        "industry": "农业与特种照明",
+        "target": "植物照明LED",
+        "features": "技术持续突破；快速填补中高端市场需求；应用于城市农业、园艺、花卉种植",
         "services": [
-          "ANSI/IES LM-79 电气与光度测试",
-          "DLC Horticultural Lighting Program 认证",
-          "IEC/TR 62942 植物照明光谱指南"
+          "IES LM-79 (电气与光度测试)",
+          "DLC (Design Lights Consortium) 植物照明规范",
+          "IEC 60598-2-13 (植物生长灯具安全)"
         ],
         "test_items": [
-          "光合光子通量（PPF）测试 (Photosynthetic Photon Flux, μmol/s)",
-          "光合光子通量密度（PPFD）空间分布测试",
-          "光谱功率分布（SPD）与PAR范围验证 (400–700nm)",
-          "能效比（μmol/J）测试",
-          "长期光衰与色漂移测试（>5000小时）",
-          "散热结构热阻测试（Rth junction-to-case）"
+          "PPFD光合光子通量密度测试 (Photosynthetic Photon Flux Density Test)",
+          "光谱功率分布测试 (Spectral Power Distribution Test)",
+          "能效比测试 (Efficiency in μmol/J)",
+          "长期光衰测试 (Long-term Lumen Depreciation Test)",
+          "IP防护等级测试 (Ingress Protection Test)"
         ]
       },
       {
-        "industry": "激光器 / 工业/消费电子",
+        "industry": "激光器 / 光电",
         "target": "LED激光器（用于水平仪、激光投影、激光切割）",
-        "features": "性能及可靠性突破；已在水平仪市场量产出货；开发激光投影、切割应用",
+        "features": "性能及可靠性持续突破；已在水平仪市场量产出货；激光投影、激光切割产品开发中",
         "services": [
-          "IEC 60825-1 激光产品安全分类",
-          "FDA CDRH Laser Product Performance Standard",
-          "GB 7247.1 激光辐射安全"
+          "IEC 60825-1 (激光产品安全)",
+          "FDA CDRH Laser Product Performance Standard"
         ],
         "test_items": [
-          "激光辐射功率/能量测试（Class I/II/IIIa/IIIb判定）",
-          "可达发射极限（AEL）验证",
-          "激光波长与线宽测试",
-          "发散角与光束质量（M²）测试",
-          "外壳防护与联锁功能测试（IEC 60825-1 Clause 6）",
-          "标签与用户警示信息合规性检查"
+          "激光等级分类测试 (Laser Class Classification Test)",
+          "输出功率稳定性测试 (Output Power Stability Test)",
+          "发散角与光束质量测试 (Beam Divergence and M² Test)",
+          "高温工作寿命试验 (High Temperature Operating Life Test)",
+          "ESD 静电放电敏感度测试 (ESD Sensitivity Test)"
         ]
       },
       {
         "industry": "射频前端 / 通信",
-        "target": "砷化镓（GaAs）/氮化镓（GaN）射频功放、滤波器（SAW）",
-        "features": "用于5G手机、基站、WiFi、物联网；提供HP36/HP56工艺；1612/1411尺寸SAW滤波器量产；客户包括主流手机品牌",
+        "target": "砷化镓/氮化镓射频功放芯片（用于手机、基站、WiFi、卫星通信）",
+        "features": "提供HBT/pHEMT代工；应用于手机、WiFi、物联网、通信基站；推出HP36/HP56工艺；支持5G/6G预研",
         "services": [
-          "JESD22-B101 板级跌落测试（若模组）",
-          "IEC 62680 USB PD兼容性（若含电源管理）",
-          "GR-468-CORE 光电/射频器件可靠性",
-          "AEC-Q200 被动器件（滤波器适用）"
+          "MIL-STD-883 (微电子器件测试方法)",
+          "JESD22 环境可靠性系列",
+          "3GPP 射频性能规范"
         ],
         "test_items": [
-          "高温高湿偏压寿命试验 (THB, JESD22-A101)",
-          "功率循环寿命测试（针对GaN HEMT）",
-          "插入损耗与带外抑制测试（SAW滤波器）",
-          "频率稳定性 vs 温度（TCF测试）",
-          "ESD 耐受能力测试（HBM ≥2kV, CDM ≥500V）",
-          "封装气密性测试（MIL-STD-883 Method 1014）"
+          "高温栅偏压应力试验 (HTGB Test)",
+          "高温漏极偏压应力试验 (HTDB Test)",
+          "功率循环寿命测试 (Power Cycling Test)",
+          "射频参数漂移测试 (RF Parameter Drift under Stress)",
+          "ESD 静电放电测试 (HBM/CDM)",
+          "温度循环下的增益稳定性测试 (Gain Stability over Temperature Cycling)"
+        ]
+      },
+      {
+        "industry": "滤波器 / 5G通信",
+        "target": "SAW滤波器（用于移动终端、卫星通信）",
+        "features": "覆盖国内外频段；单工器/双工器/多工器；1612尺寸量产出货，1411开发中；用于手机、卫星通信",
+        "services": [
+          "IEC 60122 (石英晶体与滤波器)",
+          "GR-1209/1210-CORE (Telcordia 可靠性)"
+        ],
+        "test_items": [
+          "插入损耗与带外抑制测试 (Insertion Loss and Out-of-Band Rejection Test)",
+          "频率温度稳定性测试 (Frequency vs. Temperature Test)",
+          "高温高湿存储试验 (THS Test)",
+          "机械冲击与跌落测试 (Mechanical Shock and Drop Test)",
+          "焊接热冲击测试 (Solder Heat Resistance Test)"
         ]
       },
       {
         "industry": "电力电子 / 新能源汽车",
-        "target": "碳化硅（SiC）MOSFET 和二极管（车规级）",
-        "features": "用于主驱逆变器、OBC、空调压缩机；在十余家Tier 1/整车厂送样或小批量；1200V 13mΩ产品完成摸底模块验证",
+        "target": "碳化硅MOSFET（用于主驱逆变器、OBC、充电桩、光伏）",
+        "features": "车规级应用；1200V 13mΩ迭代；在十余家Tier 1或整车厂送样验证；主驱逆变器用SiC MOSFET完成摸底模块验证",
         "services": [
-          "AEC-Q101 分立半导体器件认证",
-          "AQG324 欧洲车规功率模块标准",
-          "JEDEC JEP184 SiC器件可靠性指南"
+          "AEC-Q101 (车用分立半导体器件)",
+          "JEDEC JEP189 (SiC器件可靠性指南)",
+          "ISO 26262 (功能安全支持)"
         ],
         "test_items": [
-          "高温栅偏压试验 (HTGB, AEC-Q101)",
-          "高温反向偏压寿命试验 (HTRB, AEC-Q101)",
-          "功率循环测试（主动加热，ΔT > 100K）",
-          "短路耐受能力测试（Short Circuit Ruggedness）",
-          "雪崩能量测试（Unclamped Inductive Switching, UIS）",
-          "导通电阻（Rds(on)）热稳定性测试"
+          "高温反向偏压寿命试验 (HTRB Test)",
+          "高温栅偏压寿命试验 (HTGB Test)",
+          "功率循环测试 (Power Cycling Test)",
+          "UIS雪崩能量测试 (Unclamped Inductive Switching Test)",
+          "短路耐受能力测试 (Short Circuit Withstand Test)",
+          "Rds(on) 稳定性测试 (Drain-Source On-Resistance Stability)"
         ]
       },
       {
-        "industry": "电力电子 / 光伏/储能/数据中心",
-        "target": "SiC MOSFET（650V–2000V）用于光伏逆变器、充电桩、AI服务器电源",
-        "features": "已向阳光电源、锦浪、科士达、台达、光宝等批量供货；覆盖650V–2000V全电压系列",
+        "industry": "电力电子 / 数据中心",
+        "target": "碳化硅二极管/SiC MOSFET（用于AI服务器电源、数据中心）",
+        "features": "应用于台达、光宝、长城、维谛等数据中心及AI服务器电源客户；650V–2000V全系列布局",
         "services": [
-          "IEC 61800-5-1 变频器安全",
-          "UL 1741 逆变器并网认证",
-          "80 PLUS 钛金/铂金效率认证（服务器电源）"
+          "IEC 60747 (半导体器件)",
+          "JEDEC JESD22 环境可靠性",
+          "85/85温湿度偏压测试"
         ],
         "test_items": [
-          "开关损耗（Eon/Eoff）测试（双脉冲测试）",
-          "dv/dt 和 di/dt 抗扰度测试",
-          "漏电流与绝缘电阻测试（IEC 61800-5-1）",
-          "效率与功率因数测试（满载/半载/轻载）",
-          "热阻（Rth）与瞬态热响应测试",
-          "浪涌电流耐受测试（Inrush Current Withstand）"
+          "高温高湿反向偏压寿命试验 (H3TRB Test)",
+          "温度循环试验 (TST, -55℃~150℃)",
+          "高温贮存寿命试验 (HTSL Test)",
+          "浪涌电流耐受测试 (Surge Current Capability Test)",
+          "VF/IR 参数漂移测试 (Forward Voltage / Reverse Leakage Drift)"
         ]
       },
       {
-        "industry": "氮化镓（GaN）功率器件",
-        "target": "硅基氮化镓（GaN-on-Si）器件（650V消费电子、低压车用）",
-        "features": "用于智能功率IC、千瓦级服务器电源、车载激光雷达、人形机器人；完成60–200V低压平台定型",
+        "industry": "新兴应用 / AR眼镜",
+        "target": "碳化硅衬底（用于AR眼镜热沉与光学元件）",
+        "features": "通过高折射率和高热导率解决AR眼镜视场角窄、彩虹伪影及散热难题；向多家客户送样验证；优化光吸收率、TTV等参数",
         "services": [
-          "JEDEC JEP184 GaN可靠性指南",
-          "IEC 62368-1 音视频/ICT设备安全",
-          "USB-IF PD 3.1 合规性（若用于快充）"
+          "SEMI 标准 (半导体材料)",
+          "定制化热管理与光学性能验证"
         ],
         "test_items": [
-          "动态导通电阻（Rds(on)）测试（含恢复特性）",
-          "栅极阈值电压稳定性测试（Vth shift）",
-          "硬开关/软开关应力寿命测试",
-          "共模噪声抑制能力测试",
-          "过温保护功能验证",
-          "PCB板级热循环可靠性（若为模组）"
+          "总厚度偏差 (TTV, Total Thickness Variation) 测量",
+          "翘曲度 (Warp) 与弯曲度 (Bow) 测试",
+          "热导率测试 (Thermal Conductivity Test)",
+          "表面粗糙度测试 (Surface Roughness Ra/Rq)",
+          "光吸收率测试 (Optical Absorption Rate Test)",
+          "热膨胀系数匹配测试 (CTE Matching Test with Package)"
         ]
       },
       {
         "industry": "光通信 / 激光雷达",
-        "target": "VCSEL、DFB、EEL 激光器芯片（用于数据通信、激光雷达、甲烷探测）",
-        "features": "940nm VCSEL用于Top手机品牌；905nm EEL用于测距；785nm用于医美；1653nm DFB用于甲烷探测；车规激光雷达送样验证",
+        "target": "VCSEL/DFB/EEL 激光器芯片（用于车载激光雷达、3D传感、甲烷探测）",
+        "features": "905 EEL用于测距；940 VCSEL用于Top手机品牌；1653 DFB用于甲烷探测；激光雷达产品向车企送样或小批量供货",
         "services": [
-          "Telcordia GR-468-CORE 光器件可靠性",
-          "IEC 60825-2 通信激光安全",
-          "AEC-Q102（车规激光器）"
+          "IEC 60825-1 (激光安全)",
+          "Telcordia GR-468-CORE (光器件可靠性)",
+          "AEC-Q102 (车规光电器件)"
         ],
         "test_items": [
-          "眼图与消光比测试（高速VCSEL）",
-          "边模抑制比（SMSR）测试（DFB）",
-          "脉冲宽度与峰值功率测试（EEL for LiDAR）",
-          "气体吸收谱线匹配验证（1653nm甲烷探测）",
-          "高温工作寿命试验（85°C/TO56封装）",
-          "光束发散角与指向稳定性测试"
+          "阈值电流与斜率效率测试 (Threshold Current and Slope Efficiency Test)",
+          "眼图与调制带宽测试 (Eye Diagram and Modulation Bandwidth Test)",
+          "高温老化寿命试验 (Accelerated Aging Test at High Temperature)",
+          "波长温度漂移测试 (Wavelength Drift vs. Temperature)",
+          "气密性测试 (Hermeticity Test for TO-can Packages)",
+          "抗静电能力测试 (ESD Robustness Test)"
         ]
       },
       {
-        "industry": "AR/智能眼镜",
-        "target": "碳化硅衬底（用于AR眼镜热沉/光学元件）",
-        "features": "利用高折射率、高热导率解决AR眼镜视场角窄、彩虹伪影、散热难题；向终端厂商送样验证",
+        "industry": "氮化镓功率器件",
+        "target": "硅基氮化镓GaN器件（用于消费电子、服务器电源、人形机器人）",
+        "features": "650V平台适配高性价比需求；开发低压（60-200V）GaN用于车载激光雷达、动力电池；探索人形机器人应用",
         "services": [
-          "ASTM F3045 热界面材料热导率",
-          "SEMI MF673 碳化硅晶片参数测试",
-          "ISO 10110 光学元件表面质量"
+          "JEDEC JEP180 (GaN可靠性指南)",
+          "IEC 60747-18 (半导体器件 - GaN)"
         ],
         "test_items": [
-          "热导率测试（Laser Flash Method, ASTM E1461）",
-          "总厚度变化（TTV）测量（<1μm要求）",
-          "表面粗糙度（Ra）测试（原子力显微镜）",
-          "折射率与双折射均匀性 mapping",
-          "翘曲度（Bow/Warp）测试",
-          "光吸收率（尤其可见光波段）测试"
+          "动态 Rds(on) 测试 (Dynamic On-Resistance Test)",
+          "dV/dt 耐受能力测试 (dV/dt Immunity Test)",
+          "高温反向偏压试验 (HTRB for GaN)",
+          "开关应力寿命测试 (Switching Stress Endurance Test)",
+          "栅极可靠性测试 (Gate Reliability under Bias and Temperature)"
         ]
       }
     ]
@@ -414,121 +464,122 @@
     "opportunities": [
       {
         "industry": "半导体/光电制造 - 合规与市场准入",
-        "target": "厦门三安光电有限公司废水排放",
-        "features": "主要污染物：COD（500mg/L）、BOD5(300mg/L)、氨氮(45mg/L)、SS(400mg/L)、总磷(8mg/L)、氟化物(20mg/L)、总银（0.5mg/L）；有组织排放，无超标",
+        "target": "废水排放（含COD、氨氮、总砷、氟化物、石油类等）",
+        "features": "各子公司作为重点排污单位，废水排放执行国家及地方标准（如GB8978-1996），需定期监测并确保达标",
         "services": [
-          "工业废水排放合规性检测（依据《污水综合排放标准》GB 8978-1996 及地方标准）"
+          "工业废水污染物排放合规性检测",
+          "污水综合排放标准（GB8978）符合性验证",
+          "重点排污单位自行监测方案第三方核查"
         ],
         "test_items": [
-          "化学需氧量（COD）测定（重铬酸钾法，GB 11914-89）",
-          "五日生化需氧量（BOD5）测定（稀释与接种法，HJ 505-2009）",
-          "氨氮含量测定（纳氏试剂分光光度法，HJ 535-2009）",
-          "悬浮物（SS）测定（重量法，GB 11901-89）",
-          "总磷测定（钼酸铵分光光度法，GB 11893-89）",
-          "氟化物测定（离子选择电极法，GB 7484-87）",
-          "总银测定（原子吸收分光光度法，GB 7475-87）"
+          "化学需氧量（COD）测定",
+          "氨氮含量测定",
+          "总砷含量测定",
+          "氟化物浓度测定",
+          "石油类物质含量测定",
+          "悬浮物（SS）含量测定",
+          "pH值测定",
+          "五日生化需氧量（BOD5）测定"
         ]
       },
       {
         "industry": "半导体/光电制造 - 合规与市场准入",
-        "target": "厦门市三安集成电路有限公司含砷废水处理系统",
-        "features": "含砷废水经袋滤+混凝沉淀+超滤+离子交换处理；排放限值总砷0.2mg/L",
+        "target": "废气排放（含氨、氯气、氯化氢、氟化物、VOCs、非甲烷总烃、颗粒物等）",
+        "features": "有组织废气排放涉及多种有毒有害及挥发性污染物，执行行业及地方排放限值，需定期监测",
         "services": [
-          "含重金属工业废水专项检测与处理效能验证"
+          "固定污染源废气污染物排放检测",
+          "挥发性有机物（VOCs）排放合规评估",
+          "酸性/碱性废气治理效果验证"
         ],
         "test_items": [
-          "总砷测定（二乙基二硫代氨基甲酸银分光光度法，GB 7485-87）",
-          "pH值测定（玻璃电极法，GB 6920-86）",
-          "浊度测定（散射法，GB 13200-91）",
-          "电导率测定（电导仪法）",
-          "离子交换树脂穿透测试（As去除效率验证）"
+          "氨气排放速率与浓度测定",
+          "氯气浓度测定",
+          "氯化氢浓度测定",
+          "氟化物浓度测定",
+          "非甲烷总烃（NMHC）浓度测定",
+          "挥发性有机物（VOCs）组分分析",
+          "颗粒物排放浓度测定",
+          "硫酸雾浓度测定"
         ]
       },
       {
-        "industry": "半导体/光电制造 - 安全性与可靠性",
-        "target": "泉州三安半导体有限公司含砷/磷烷废气处理系统",
-        "features": "废气含砷烷（0.5mg/m³）、磷烷（1.0mg/m³）、AsH3（1mg/m³）；采用燃烧式尾气处理器+湿式静电除尘",
+        "industry": "环保设施运维 - 安全性与可靠性",
+        "target": "污染防治设施（如污水站、废气处理系统、危废仓库）",
+        "features": "各公司建设了酸碱中和、生化处理、吸附塔、RTO焚烧、SDG吸附等设施，并确保100%同步运行率",
         "services": [
-          "剧毒/易燃特种气体排放安全检测（依据《大气污染物综合排放标准》GB 16297 及半导体行业规范）"
+          "环保设施运行效能第三方评估",
+          "废气/废水处理系统性能验证测试",
+          "危险废物贮存设施合规性审计"
         ],
         "test_items": [
-          "砷烷（AsH3）浓度测定（气相色谱-原子荧光联用法）",
-          "磷烷（PH3）浓度测定（气相色谱法或化学发光法）",
-          "非甲烷总烃（NMHC）测定（气相色谱法，HJ 38-2017）",
-          "颗粒物排放浓度测定（重量法，GB/T 16157-1996）",
-          "废气处理系统去除效率验证测试（入口vs出口浓度比对）"
+          "污水处理系统进出水污染物去除效率测试",
+          "废气处理装置进出口浓度对比测试",
+          "活性炭吸附材料饱和度与更换周期验证",
+          "RTO焚烧炉燃烧效率与二噁英前驱物控制评估",
+          "危废仓库防渗漏与标识合规检查"
         ]
       },
       {
-        "industry": "半导体/光电制造 - 合规与市场准入",
-        "target": "湖北三安光电有限公司废气排放",
-        "features": "含臭气浓度（4000无量纲）、硫化氢（0.58kg/h）、氨（8.7kg/h）；污水处理站臭气经化学处理后排放",
+        "industry": "建设项目环保管理 - 合规与市场准入",
+        "target": "新建/改扩建项目（如碳化硅衬底、Mini/Micro LED、光收发芯片等）",
+        "features": "所有项目均履行环评审批与环保验收程序，部分涉及辐射、锅炉等专项许可",
         "services": [
-          "恶臭污染物排放检测（依据《恶臭污染物排放标准》GB 14554-93）"
+          "建设项目竣工环境保护验收技术核查",
+          "环评批复落实情况合规审计",
+          "辐射安全与锅炉废气专项检测"
         ],
         "test_items": [
-          "臭气浓度测定（三点比较式臭袋法，GB/T 14675-93）",
-          "硫化氢浓度测定（亚甲基蓝分光光度法，GB/T 11742-89）",
-          "氨浓度测定（纳氏试剂分光光度法，HJ 533-2009）",
-          "厂界无组织排放监控点布点与采样（GB 14554附录）"
+          "环保“三同时”制度执行情况现场核查",
+          "主要产排污环节与环评一致性比对",
+          "锅炉废气低氮燃烧效果验证",
+          "辐射源屏蔽与剂量率监测（如适用）"
         ]
       },
       {
-        "industry": "环保设施运维 - 性能与效能",
-        "target": "各子公司有机废气处理系统（如沸石转轮+RTO、活性炭吸附等）",
-        "features": "VOCs、非甲烷总烃、丙酮等有机废气经沸石转轮吸附+蓄热式焚化炉或活性炭纤维净化器处理",
+        "industry": "环境应急管理 - 安全性与可靠性",
+        "target": "突发环境事件应急预案",
+        "features": "所有重点排污单位均已编制预案并在属地生态环境部门备案，配备应急物资并开展演练",
         "services": [
-          "挥发性有机物（VOCs）治理设施性能验证与排放达标测试"
+          "突发环境事件应急预案有效性评审",
+          "环境风险源识别与防控措施验证",
+          "应急演练第三方观察与评估"
         ],
         "test_items": [
-          "非甲烷总烃（NMHC）排放浓度测定（HJ 38-2017）",
-          "特征VOCs组分（如丙酮、甲苯、二甲苯）定性定量分析（GC-MS，HJ 734-2014）",
-          "RTO焚烧效率测试（入口/出口VOCs质量平衡计算）",
-          "活性炭吸附装置穿透时间与更换周期评估",
-          "排气筒风量与温度测定（皮托管法，GB/T 16157）"
+          "环境风险物质泄漏情景模拟测试",
+          "应急池容量与切换响应时间验证",
+          "吸附/中和药剂储备量与有效性核查",
+          "厂界敏感点应急监测布点合理性评估"
         ]
       },
       {
-        "industry": "建设项目环保合规 - 合规与市场准入",
-        "target": "新建/扩建半导体项目（如湖南三安、重庆三安碳化硅项目）",
-        "features": "已取得环评批复及自主验收，涉及辐射（如磷烷、砷烷使用）",
+        "industry": "环境监测体系 - 供应链管控",
+        "target": "环境自行监测方案实施",
+        "features": "企业制定自行监测方案，委托有资质第三方开展定期监测，部分因子在线监控",
         "services": [
-          "建设项目竣工环境保护验收监测（含辐射环境影响专项）"
+          "自行监测方案合规性审核（依据《排污单位自行监测技术指南》）",
+          "第三方监测数据质量抽查",
+          "在线监测设备比对测试"
         ],
         "test_items": [
-          "γ辐射剂量率监测（便携式剂量仪，依据HJ 61-2021）",
-          "工作场所表面放射性污染检测（擦拭法）",
-          "废气中放射性核素（如^75Se、^76As模拟）筛查（高纯锗γ谱仪）",
-          "环保设施“三同时”落实情况核查（文件+现场）",
-          "噪声排放监测（工业企业厂界环境噪声，GB 12348-2008）"
+          "手工监测与在线监测数据比对试验",
+          "监测频次与因子覆盖完整性核查",
+          "第三方检测机构CMA资质范围匹配性审查",
+          "监测点位代表性与采样规范性现场核查"
         ]
       },
       {
-        "industry": "环境管理体系 - 供应链管控",
-        "target": "企业突发环境事件应急预案备案",
-        "features": "所有重点排污单位均已编制并备案应急预案，配备应急物资",
+        "industry": "清洁能源与减碳 - 性能与效能",
+        "target": "分布式光伏发电系统",
+        "features": "为减少碳排放，公司建设分布式光伏等可再生能源项目",
         "services": [
-          "突发环境事件应急预案评审与演练效果评估（依据《企业事业单位突发环境事件应急预案备案管理办法》）"
+          "光伏系统能效与发电性能验证",
+          "绿色电力使用追溯认证（如适用）"
         ],
         "test_items": [
-          "应急物资清单符合性核查（吸附棉、围堰、中和剂等）",
-          "应急池容积与最大事故废水量匹配性计算",
-          "应急演练记录与响应时效评估",
-          "风险源识别完整性审查（危化品、液氨储罐、酸碱罐区等）"
-        ]
-      },
-      {
-        "industry": "环境监测 - 性能与效能",
-        "target": "企业自行监测方案执行情况",
-        "features": "废水在线监测（COD、氨氮、pH），废气委托第三方定期监测",
-        "services": [
-          "环境自行监测数据有效性审核与比对监测"
-        ],
-        "test_items": [
-          "COD在线监测仪比对测试（手工法 vs 在线值，HJ 355-2019）",
-          "氨氮在线监测系统校准与漂移测试",
-          "pH在线监测设备标准缓冲溶液校验",
-          "有组织废气手工监测同步采样（多点位、多时段）"
+          "光伏组件转换效率测试",
+          "逆变器效率与电能质量测试",
+          "年发电量与理论值偏差分析",
+          "并网保护功能验证"
         ]
       }
     ]
