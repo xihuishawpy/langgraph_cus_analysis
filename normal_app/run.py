@@ -67,6 +67,23 @@ SECTION_ANALYSIS_REQUIREMENT = """
 """
 
 
+# SECTION_ANALYSIS_REQUIREMENT = """
+# 请阅读章节内容，仅输出 JSON：
+# {
+#   "title": "章节标题",
+#   "opportunities": [
+#     {
+#       "industry": "所属行业/类别",
+#       "target": "具体产品/对象",
+#       "features": "来自原文的关键特征或应用描述",
+#       "services": ["推荐 TIC 服务方案（使用具体标准或测试名称）"],
+#       "test_items": ["服务对应的具体检测项目（例如：绝缘耐压测试、IP 防护等级测试、盐雾腐蚀测试等，尽可能详细列出）"]
+#     }
+#   ]
+# }
+# 如无可提取内容，opportunities 传回空数组。严禁输出 JSON 以外内容。
+# """
+
 @dataclass
 class Section:
     title: str
